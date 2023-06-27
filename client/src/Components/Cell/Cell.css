@@ -1,0 +1,13 @@
+
+  .Cell {
+    height:80px;
+    width:80px;
+  }
+
+  .dark_cell {
+    background-color: burlywood;
+  }
+
+  .light_cell{
+    background-color: cornsilk;
+  }
