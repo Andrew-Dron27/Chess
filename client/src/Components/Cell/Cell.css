@@ -11,3 +11,8 @@
   .light_cell{
     background-color: cornsilk;
   }
+
+  .image{
+    height:80px;
+    width:80px;
+  }
