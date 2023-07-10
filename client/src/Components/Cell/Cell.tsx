@@ -1,5 +1,6 @@
 import { Console } from 'console';
 import './Cell.css';
+import { useState } from 'react';
 type CellProps = {
     id : number
     piece: string
@@ -9,21 +10,62 @@ const Cell = (props: CellProps) => {
     let className : string = 'Cell ';
     let row : number = Math.floor(props.id / 8);
 
+    let color : string = '';
+
     if(row % 2 == 0)
     {
-       className+= props.id % 2 == 0 ? 'light_cell' : 'dark_cell' ;
+        if(props.id % 2 != 0)
+        {
+            color = 'burlywood';
+        }
+        else
+        {
+            color = 'cornsilk';
+        }
     }
     else
     {
-        className+= props.id % 2 != 0 ? 'light_cell' : 'dark_cell' ;
+        if(props.id % 2 == 0)
+        {
+            color = 'burlywood';
+        }
+        else
+        {
+            color = 'cornsilk';
+        }
     }
-        
+
+    const originalColor = color;
+
+
+    const [currentPiece, setCurrentPiece] = useState(getPieceImageSrc(props.piece));
+    const [selected, setSelected] = useState(false);
+    const [name, setName] = useState('Cell ');
+    const [backgroundColor, setBackgroundColor] = useState(color);
+
     return(
       <td className= {className}
-        id={props.id.toString()}>
-            <img src={getPieceImageSrc(props.piece)} className='image' alt="" />
+        id={props.id.toString()} onClick={() => onClick(props.id, selected, originalColor,
+             setSelected, setBackgroundColor)}
+        style={{backgroundColor: backgroundColor}}>
+            <img src={currentPiece} className='image' alt="" />
         </td>
     )
+}
+
+const onClick = (id: number, selected: boolean, originalColor : string,
+      setSelected: React.Dispatch<React.SetStateAction<boolean>>,
+     setColor: React.Dispatch<React.SetStateAction<string>>) => {
+    if(selected)
+    {
+        setSelected(false);
+        setColor(originalColor);
+    }
+    else
+    {
+        setSelected(true);
+        setColor('yellow');
+    }
 }
 
 const getPieceImageSrc = (piece: string) : string =>
