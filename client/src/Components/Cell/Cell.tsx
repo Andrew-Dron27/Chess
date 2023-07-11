@@ -1,100 +1,105 @@
 import { Console } from 'console';
 import './Cell.css';
 import { useState } from 'react';
+import PieceNames from '../../enums/PieceNames';
+
+const brightCellColor = 'cornsilk';
+const darkCellColor = 'burlywood';
+const selectedCellColor = 'yellow';
+
 type CellProps = {
     id : number
-    piece: string
+    currentPiece: string
+    selectedCell: number
+    selectCallBack: (id: number) => void
 }
 
 const Cell = (props: CellProps) => {
-    let className : string = 'Cell ';
+    let className : string = 'Cell';
     let row : number = Math.floor(props.id / 8);
-
     let color : string = '';
 
     if(row % 2 == 0)
     {
         if(props.id % 2 != 0)
         {
-            color = 'burlywood';
+            color = darkCellColor;
         }
         else
         {
-            color = 'cornsilk';
+            color = brightCellColor;
         }
     }
     else
     {
         if(props.id % 2 == 0)
         {
-            color = 'burlywood';
+            color = darkCellColor;
         }
         else
         {
-            color = 'cornsilk';
+            color = brightCellColor;
         }
     }
 
     const originalColor = color;
-
-
-    const [currentPiece, setCurrentPiece] = useState(getPieceImageSrc(props.piece));
-    const [selected, setSelected] = useState(false);
-    const [name, setName] = useState('Cell ');
+    const [currentPiece, setCurrentPiece] = useState(props.currentPiece);
     const [backgroundColor, setBackgroundColor] = useState(color);
+
+    const onClick = () => {
+        
+        if(props.currentPiece == PieceNames.empty)
+            return;
+        if(props.selectedCell == -1)
+        {
+            setBackgroundColor(selectedCellColor);
+            props.selectCallBack(props.id);
+        }
+        if(props.selectedCell == props.id)
+        {
+            setBackgroundColor(originalColor);
+            props.selectCallBack(-1);
+        }
+   }
+   
 
     return(
       <td className= {className}
-        id={props.id.toString()} onClick={() => onClick(props.id, selected, originalColor,
-             setSelected, setBackgroundColor)}
+        id={props.id.toString()} onClick={() => onClick()}
         style={{backgroundColor: backgroundColor}}>
-            <img src={currentPiece} className='image' alt="" />
+            <img src={getPieceImageSrc(currentPiece)} className='image' alt="" />
         </td>
     )
 }
 
-const onClick = (id: number, selected: boolean, originalColor : string,
-      setSelected: React.Dispatch<React.SetStateAction<boolean>>,
-     setColor: React.Dispatch<React.SetStateAction<string>>) => {
-    if(selected)
-    {
-        setSelected(false);
-        setColor(originalColor);
-    }
-    else
-    {
-        setSelected(true);
-        setColor('yellow');
-    }
-}
 
 const getPieceImageSrc = (piece: string) : string =>
 {
     switch (piece)
     {
-        case 'p' :
+        case PieceNames.darkPawn :
             return require('../../Resources/Pieces/pawn_dark.png');
-        case 'r' :
+        case PieceNames.darkRook :
             return require('../../Resources/Pieces/rook_dark.png');
-        case 'n' :
+        case PieceNames.darkKnight :
             return require('../../Resources/Pieces/knight_dark.png');
-        case 'b' :
+        case PieceNames.darkBishop :
             return require('../../Resources/Pieces/bishop_dark.png');
-        case 'k' :
+        case PieceNames.darkKing :
             return require('../../Resources/Pieces/king_dark.png');
-        case 'q' :
+        case PieceNames.darkQueen :
             return require('../../Resources/Pieces/queen_dark.png');
-        case 'P' :
+        case PieceNames.lightPawn :
             return require('../../Resources/Pieces/pawn_light.png');
-        case 'R' :
+        case PieceNames.lightRook :
             return require('../../Resources/Pieces/rook_light.png');
-        case 'N' :
+        case PieceNames.lightKnight :
             return require('../../Resources/Pieces/knight_light.png');
-        case 'B' :
+        case PieceNames.lightBishop :
             return require('../../Resources/Pieces/bishop_light.png');
-        case 'K' :
+        case PieceNames.lightKing :
             return require('../../Resources/Pieces/king_light.png');
-        case 'Q' :
+        case PieceNames.lightQueen :
             return require('../../Resources/Pieces/queen_light.png');
         default :
             return '';

@@ -12,33 +12,46 @@ export type BoardProps = {
 
 const Board = () => {
 
-    const [boardState, setBoardState] = useState<BoardState>(initBoardState());
+    const brightCellColor = 'cornsilk';
+    const darkCellColor = 'burlywood';
+    const selectedCellColor = 'yellow';
 
-    const rows = [];
+    const [boardState, setBoardState] = useState<BoardState>(initBoardState());
+    const [selectedCell, setSelectedCell] = useState<number>(-1);
+
+    const callback = (id : number) => 
+    {
+      setSelectedCell(id);
+    }
+
+    const board = [];
     for(let i = 0; i < 8; i++)
     {
-      const squares = [];
+      const row = [];
       const offset = i * 8; 
       for(let j = 0; j < 8; j++)
       {
-          squares.push(
+        let cellNum = offset + j;
+          row.push(
             <Cell
-              key = {offset + j}
-              id = {(offset + j)}
-              piece= {boardState.board[i][j]}
+              key = {cellNum}
+              id = {cellNum}
+              currentPiece= {boardState.board[i][j]}
+              selectedCell = {selectedCell}
+              selectCallBack={callback}
             />
           );
       }
-        rows.push(
+        board.push(
           <tr key = {i} className="row">
-            {squares}
+            {row}
           </tr>
         );
     }
     return(
       <table id="Board">
         <tbody>
-          {rows}
+          {board}
         </tbody> 
       </table>
     )
@@ -47,7 +60,8 @@ const Board = () => {
 const initBoardState = () : BoardState => 
 {
     let state : BoardState = {
-        board: [['r','n', 'b', 'q', 'k', 'b', 'n', 'r'],
+        board: [
+        ['r','n', 'b', 'q', 'k', 'b', 'n', 'r'],
         ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
         ['', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', ''],
