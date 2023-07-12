@@ -1,6 +1,8 @@
 import { BoardState } from "../Components/Board/Board";
 import PieceNames from "../enums/PieceNames";
 
+const boardSize = 8;
+
 /**
  * Given a current board state, and a current selected cell, returns an array
  * with all valid move locations possible for the selected piece.
@@ -10,13 +12,11 @@ import PieceNames from "../enums/PieceNames";
  */
 const calculatePossibleMoves = (board: BoardState, selectedCell: number) : number[] =>{
   let validMoves: number[] = [];
-  let i = selectedCell / 8;
-  let j = selectedCell % 8;
-  switch (board.board[i][j]){
+  switch (getPieceName(board, selectedCell)){
       case PieceNames.darkPawn :
-          
+        return calculateDarkPawnMoves(board, selectedCell);
       case PieceNames.darkRook :
-  
+        return calculateRookMoves(board, selectedCell);
       case PieceNames.darkKnight :
           
       case PieceNames.darkBishop :
@@ -26,9 +26,9 @@ const calculatePossibleMoves = (board: BoardState, selectedCell: number) : numbe
       case PieceNames.darkQueen :
           
       case PieceNames.lightPawn :
-          
+        return calculateLightPawnMoves(board, selectedCell);
       case PieceNames.lightRook :
-          
+        return calculateRookMoves(board, selectedCell);
       case PieceNames.lightKnight :
           
       case PieceNames.lightBishop :
@@ -49,7 +49,59 @@ const calculatePossibleMoves = (board: BoardState, selectedCell: number) : numbe
  */
 const calculateLightPawnMoves = (board: BoardState, selectedCell: number) : number[] =>{
     let validMoves: number[] = [];
-    
+    let offset = boardSize - 1;
+    for(let i = 0; i < 2; i ++)
+    {
+        let index = selectedCell + offset + i;
+        //TODO: check for pawn first move
+        if(!isConflict(board, index, getPieceName(board, selectedCell)))
+            validMoves.push(index);
+    }
+    return validMoves;
+}
+
+/**
+ * Calculate all possible moves for a dark pawn piece.
+ * @param board 
+ * @param selectedCell 
+ */
+const calculateDarkPawnMoves = (board: BoardState, selectedCell: number) : number[] =>{
+    let validMoves: number[] = [];
+    let offset = boardSize - 1;
+    for(let i = 0; i < 2; i ++)
+    {
+        let index = selectedCell - offset - i;
+        //TODO: check for pawn first move
+        if(!isConflict(board, index, getPieceName(board, selectedCell)))
+            validMoves.push(index);
+    }
+    return validMoves;
+}
+
+/**
+ * Calculate all possible moves for a dark rook piece
+ * @param board 
+ * @param selectedCell 
+ * @returns 
+ */
+const calculateRookMoves = (board: BoardState, selectedCell: number) : number[] =>{
+    let validMoves: number[] = [];
+    for(let i = 1; i < 7; i++)
+    {
+        let index = selectedCell + i;
+        if(isConflict(board, index, getPieceName(board, selectedCell)))
+            break;
+        validMoves.push(index);
+    }
+
+    for(let i = 0; i < 7; i++)
+    {
+        let offset = boardSize * i;
+        let index = selectedCell + offset;
+        if(isConflict(board, index, getPieceName(board, selectedCell)))
+            break;
+        validMoves.push(index);
+    }
 
     return validMoves;
 }
@@ -98,4 +150,16 @@ const isLightPiece = (piece: string): boolean => {
         default:
             return false;
     }
+}
+
+/**
+ * 
+ * @param board 
+ * @param selectedCell 
+ * @returns 
+ */
+const getPieceName = (board: BoardState, selectedCell: number) : string =>{
+    let i = selectedCell / 8;
+    let j = selectedCell % 8;
+    return board.board[i][j];
 }
