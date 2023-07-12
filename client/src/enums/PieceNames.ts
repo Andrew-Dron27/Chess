@@ -1,3 +1,6 @@
+/**
+ * Enum represtening the characters given for each piece type.
+ */
 enum PieceNames {
     darkPawn = 'p',
     darkRook = 'r',

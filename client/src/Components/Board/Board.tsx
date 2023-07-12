@@ -1,27 +1,27 @@
 import { useState } from "react";
 import Cell from "../Cell/Cell";
 import './Board.css';
+import PieceNames from "../../enums/PieceNames";
 
 export type BoardProps = {
     message: string;
   };
 
-  type BoardState = {
-    board: (string) [][];
-  }
+export type BoardState = {
+  board: (string) [][],
+  firstPawns: (boolean) [][];
+}
 
 const Board = () => {
 
-    const brightCellColor = 'cornsilk';
-    const darkCellColor = 'burlywood';
-    const selectedCellColor = 'yellow';
-
     const [boardState, setBoardState] = useState<BoardState>(initBoardState());
     const [selectedCell, setSelectedCell] = useState<number>(-1);
+    const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
 
-    const callback = (id : number) => 
+    const callback = (id : number, piece: string) => 
     {
       setSelectedCell(id);
+      setSelectedPiece(piece);
     }
 
     const board = [];
@@ -57,18 +57,32 @@ const Board = () => {
     )
 }
 
+/**
+ * Initialize board state with standard chess starting pieces, first pawn moves all set to false.
+ * @returns 
+ */
 const initBoardState = () : BoardState => 
 {
     let state : BoardState = {
         board: [
-        ['r','n', 'b', 'q', 'k', 'b', 'n', 'r'],
-        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-        ['R','N', 'B', 'Q', 'K', 'B', 'N', 'R'],]
+        [PieceNames.darkPawn,PieceNames.darkKnight, PieceNames.darkBishop, PieceNames.darkQueen,
+           PieceNames.darkKing, PieceNames.darkBishop, PieceNames.darkKnight, PieceNames.darkPawn],
+        [PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn,
+           PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn],
+        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
+           PieceNames.empty, PieceNames.empty, PieceNames.empty],
+        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
+           PieceNames.empty, PieceNames.empty, PieceNames.empty],
+        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
+           PieceNames.empty, PieceNames.empty, PieceNames.empty],
+        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
+           PieceNames.empty, PieceNames.empty, PieceNames.empty],
+        [PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn,
+           PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn],
+        [PieceNames.lightRook,PieceNames.lightKnight, PieceNames.lightBishop, PieceNames.lightQueen,
+           PieceNames.lightKing, PieceNames.lightBishop, PieceNames.lightKnight, PieceNames.lightRook],],
+        firstPawns : [[false, false, false, false, false, false, false, false],
+         [false, false, false, false, false, false, false, false]]
     };
     return state;
 }

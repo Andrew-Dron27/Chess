@@ -11,7 +11,7 @@ type CellProps = {
     id : number
     currentPiece: string
     selectedCell: number
-    selectCallBack: (id: number) => void
+    selectCallBack: (id: number, piece: string) => void
 }
 
 const Cell = (props: CellProps) => {
@@ -53,12 +53,12 @@ const Cell = (props: CellProps) => {
         if(props.selectedCell == -1)
         {
             setBackgroundColor(selectedCellColor);
-            props.selectCallBack(props.id);
+            props.selectCallBack(props.id, props.currentPiece);
         }
         if(props.selectedCell == props.id)
         {
             setBackgroundColor(originalColor);
-            props.selectCallBack(-1);
+            props.selectCallBack(-1, '');
         }
    }
    
