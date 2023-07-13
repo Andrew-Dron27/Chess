@@ -2,15 +2,9 @@ import { useState } from "react";
 import Cell from "../Cell/Cell";
 import './Board.css';
 import PieceNames from "../../enums/PieceNames";
+import { BoardState } from "../../Types/Types";
+import { initBoardState, calculatePossibleMoves } from "../../Logic/chess";
 
-export type BoardProps = {
-    message: string;
-  };
-
-export type BoardState = {
-  board: (string) [][],
-  firstPawns: (boolean) [][];
-}
 
 const Board = () => {
 
@@ -55,36 +49,6 @@ const Board = () => {
         </tbody> 
       </table>
     )
-}
-
-/**
- * Initialize board state with standard chess starting pieces, first pawn moves all set to false.
- * @returns 
- */
-const initBoardState = () : BoardState => 
-{
-    let state : BoardState = {
-        board: [
-        [PieceNames.darkPawn,PieceNames.darkKnight, PieceNames.darkBishop, PieceNames.darkQueen,
-           PieceNames.darkKing, PieceNames.darkBishop, PieceNames.darkKnight, PieceNames.darkPawn],
-        [PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn,
-           PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn],
-        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
-           PieceNames.empty, PieceNames.empty, PieceNames.empty],
-        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
-           PieceNames.empty, PieceNames.empty, PieceNames.empty],
-        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
-           PieceNames.empty, PieceNames.empty, PieceNames.empty],
-        [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
-           PieceNames.empty, PieceNames.empty, PieceNames.empty],
-        [PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn,
-           PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn, PieceNames.lightPawn],
-        [PieceNames.lightRook,PieceNames.lightKnight, PieceNames.lightBishop, PieceNames.lightQueen,
-           PieceNames.lightKing, PieceNames.lightBishop, PieceNames.lightKnight, PieceNames.lightRook],],
-        firstPawns : [[false, false, false, false, false, false, false, false],
-         [false, false, false, false, false, false, false, false]]
-    };
-    return state;
 }
 
 export default Board;

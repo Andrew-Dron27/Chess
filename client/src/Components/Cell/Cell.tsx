@@ -2,17 +2,11 @@ import { Console } from 'console';
 import './Cell.css';
 import { useState } from 'react';
 import PieceNames from '../../enums/PieceNames';
+import { CellProps } from '../../Types/Types';
 
 const brightCellColor = 'cornsilk';
 const darkCellColor = 'burlywood';
 const selectedCellColor = 'yellow';
-
-type CellProps = {
-    id : number
-    currentPiece: string
-    selectedCell: number
-    selectCallBack: (id: number, piece: string) => void
-}
 
 const Cell = (props: CellProps) => {
     let className : string = 'Cell';
