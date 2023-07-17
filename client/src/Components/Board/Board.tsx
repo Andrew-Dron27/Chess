@@ -1,28 +1,71 @@
 import { useState } from "react";
 import Cell from "../Cell/Cell";
 import './Board.css';
-
-export type BoardProps = {
-    message: string;
-  };
-
-  type BoardState = {
-    board: (string) [][];
-  }
+import PieceNames from "../../enums/PieceNames";
+import { BoardState } from "../../Types/Types";
+import { initBoardState, calculatePossibleMoves } from "../../Logic/Chess";
+import Colors from "../../enums/Colors";
 
 const Board = () => {
 
-    const brightCellColor = 'cornsilk';
-    const darkCellColor = 'burlywood';
-    const selectedCellColor = 'yellow';
-
     const [boardState, setBoardState] = useState<BoardState>(initBoardState());
     const [selectedCell, setSelectedCell] = useState<number>(-1);
+    const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
+    const [possibleMoves, setPossibleMoves] = useState<number[]>([]);
 
-    const callback = (id : number) => 
+    const callback = (id : number, piece: string) => 
     {
       setSelectedCell(id);
+
     }
+
+    const determineColor = (id: number): string => {
+      let row : number = Math.floor(id / 8);
+      if(selectedCell == id)
+      {
+        return Colors.selectedCellColor;
+      }
+        
+      if(row % 2 == 0)
+      {
+          if(id % 2 != 0)
+          {
+              return Colors.darkCellColor;
+          }
+          else
+          {
+              return Colors.brightCellColor;
+          }
+      }
+      else
+      {
+          if(id % 2 == 0)
+          {
+              return Colors.darkCellColor;
+          }
+          else
+          {
+              return Colors.brightCellColor;
+          }
+      }
+    }
+
+    const onCellClick = (id: number, currentPiece: string) => {
+        console.log(id);
+        if(currentPiece == PieceNames.empty)
+          return;
+        setSelectedCell(id);
+        if(id == -1)
+          setPossibleMoves([]);
+        else
+        {
+          let moves = calculatePossibleMoves(boardState, id)
+          setPossibleMoves(moves);
+          console.log(moves);
+        }
+        setSelectedPiece(currentPiece);
+    }
+
 
     const board = [];
     for(let i = 0; i < 8; i++)
@@ -36,8 +79,13 @@ const Board = () => {
             <Cell
               key = {cellNum}
               id = {cellNum}
-              currentPiece= {boardState.board[i][j]}
-              selectedCell = {selectedCell}
+              currentPiece = {boardState.board[i][j]}
+              currentColor = {determineColor(cellNum)}
+              isHighlighted = {possibleMoves.find((x) => x == cellNum) != undefined}
+              isSelected = {selectedCell == cellNum}
+              onClick = {() => {
+                onCellClick(cellNum, boardState.board[i][j]);
+              }}
               selectCallBack={callback}
             />
           );
@@ -55,22 +103,6 @@ const Board = () => {
         </tbody> 
       </table>
     )
-}
-
-const initBoardState = () : BoardState => 
-{
-    let state : BoardState = {
-        board: [
-        ['r','n', 'b', 'q', 'k', 'b', 'n', 'r'],
-        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-        ['R','N', 'B', 'Q', 'K', 'B', 'N', 'R'],]
-    };
-    return state;
 }
 
 export default Board;
