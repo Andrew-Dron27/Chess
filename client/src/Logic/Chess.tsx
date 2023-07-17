@@ -193,7 +193,7 @@ const calculateKnightMoves = (board: BoardState, index: [number, number]) : numb
         validMoves.push((row+2) * boardSize + col + 1);
     //
     if(!isConflict(board, [row,col], [row+2, col-1]))
-        validMoves.push((row+2) * boardSize + col + 1);
+        validMoves.push((row+2) * boardSize + col - 1);
     //
     if(!isConflict(board, [row,col], [row+1, col-2]))
         validMoves.push((row+1) * boardSize + col - 2 );
@@ -204,7 +204,7 @@ const calculateKnightMoves = (board: BoardState, index: [number, number]) : numb
     if(!isConflict(board, [row,col], [row-2, col-1]))
         validMoves.push((row-2) * boardSize + col - 1);
     //
-    if(!isConflict(board, [row,col], [row+1, col+1]))
+    if(!isConflict(board, [row,col], [row-2, col+1]))
         validMoves.push((row-2) * boardSize + col + 1);
     //
     if(!isConflict(board, [row,col], [row-1, col-2]))
@@ -324,6 +324,9 @@ const isConflict = (board: BoardState, index: [number, number], selectedPiece: [
         return true;
     
     let checkPiece = board.board[checkRow][checkCol];
+
+    if(checkPiece == PieceNames.empty)
+        return false;
     
     if(isLightPiece(piece) && isLightPiece(checkPiece)){
         return true;
@@ -352,6 +355,7 @@ const isLightPiece = (piece: string): boolean => {
         case PieceNames.lightKing :
             return true;
         case PieceNames.lightQueen :
+            return true;
         default:
             return false;
     }
@@ -375,6 +379,7 @@ const isDarkPiece = (piece: string): boolean => {
         case PieceNames.darkKing :
             return true;
         case PieceNames.darkQueen :
+            return true;
         default:
             return false;
     }

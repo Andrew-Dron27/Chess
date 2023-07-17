@@ -16,15 +16,7 @@ const Board = () => {
     const callback = (id : number, piece: string) => 
     {
       setSelectedCell(id);
-      if(id == -1)
-        setPossibleMoves([]);
-      else
-      {
-        let moves = calculatePossibleMoves(boardState, id)
-        setPossibleMoves(moves);
-        console.log(moves);
-      }
-      setSelectedPiece(piece);
+
     }
 
     const determineColor = (id: number): string => {
@@ -63,6 +55,15 @@ const Board = () => {
         if(currentPiece == PieceNames.empty)
           return;
         setSelectedCell(id);
+        if(id == -1)
+          setPossibleMoves([]);
+        else
+        {
+          let moves = calculatePossibleMoves(boardState, id)
+          setPossibleMoves(moves);
+          console.log(moves);
+        }
+        setSelectedPiece(currentPiece);
     }
 
 
@@ -80,6 +81,7 @@ const Board = () => {
               id = {cellNum}
               currentPiece = {boardState.board[i][j]}
               currentColor = {determineColor(cellNum)}
+              isHighlighted = {possibleMoves.find((x) => x == cellNum) != undefined}
               isSelected = {selectedCell == cellNum}
               onClick = {() => {
                 onCellClick(cellNum, boardState.board[i][j]);

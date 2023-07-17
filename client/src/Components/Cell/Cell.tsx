@@ -18,6 +18,10 @@ const Cell = (props: CellProps) => {
         {
             setBackgroundColor(props.currentColor);
         }
+        else if(props.isHighlighted)
+        {
+            setBackgroundColor(Colors.hightlightedColor);
+        }
         else
         {
             setBackgroundColor(originalColor);
