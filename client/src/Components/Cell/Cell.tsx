@@ -1,72 +1,44 @@
 import { Console } from 'console';
 import './Cell.css';
-import { useState } from 'react';
+import { useInsertionEffect, useState, useEffect } from 'react';
 import PieceNames from '../../enums/PieceNames';
 import { CellProps } from '../../Types/Types';
+import Colors from '../../enums/Colors';
 
-const brightCellColor = 'cornsilk';
-const darkCellColor = 'burlywood';
-const selectedCellColor = 'yellow';
 
 const Cell = (props: CellProps) => {
     let className : string = 'Cell';
-    let row : number = Math.floor(props.id / 8);
-    let color : string = '';
 
-    if(row % 2 == 0)
-    {
-        if(props.id % 2 != 0)
-        {
-            color = darkCellColor;
-        }
-        else
-        {
-            color = brightCellColor;
-        }
-    }
-    else
-    {
-        if(props.id % 2 == 0)
-        {
-            color = darkCellColor;
-        }
-        else
-        {
-            color = brightCellColor;
-        }
-    }
-
-    const originalColor = color;
+    const originalColor = props.currentColor;
     const [currentPiece, setCurrentPiece] = useState(props.currentPiece);
-    const [backgroundColor, setBackgroundColor] = useState(color);
+    const [backgroundColor, setBackgroundColor] = useState(props.currentColor);
 
-    const onClick = () => {
-        
-        if(props.currentPiece == PieceNames.empty)
-            return;
-        if(props.selectedCell == -1)
+    useEffect(() => {
+        if(props.isSelected)
         {
-            setBackgroundColor(selectedCellColor);
-            props.selectCallBack(props.id, props.currentPiece);
+            setBackgroundColor(props.currentColor);
         }
-        if(props.selectedCell == props.id)
+        else
         {
             setBackgroundColor(originalColor);
-            props.selectCallBack(-1, '');
         }
-   }
-   
+        
+    })
 
     return(
       <td className= {className}
-        id={props.id.toString()} onClick={() => onClick()}
+        id={props.id.toString()} onClick={() => {props.onClick()}}
         style={{backgroundColor: backgroundColor}}>
             <img src={getPieceImageSrc(currentPiece)} className='image' alt="" />
         </td>
     )
 }
 
-
+/**
+ * Convert piece represtentation string into image file path
+ * @param piece 
+ * @returns 
+ */
 const getPieceImageSrc = (piece: string) : string =>
 {
     switch (piece)
@@ -99,4 +71,8 @@ const getPieceImageSrc = (piece: string) : string =>
             return '';
     }
 }
+
+
+
+
 export default Cell;

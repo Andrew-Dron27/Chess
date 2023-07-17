@@ -3,6 +3,7 @@ import PieceNames from "../enums/PieceNames";
 
 const boardSize = 8;
 
+
 /**
  * Initialize board state with standard chess starting pieces, first pawn moves all set to false.
  * @returns 
@@ -11,8 +12,8 @@ export const initBoardState = () : BoardState =>
 {
     let state : BoardState = {
         board: [
-        [PieceNames.darkPawn,PieceNames.darkKnight, PieceNames.darkBishop, PieceNames.darkQueen,
-           PieceNames.darkKing, PieceNames.darkBishop, PieceNames.darkKnight, PieceNames.darkPawn],
+        [PieceNames.darkRook,PieceNames.darkKnight, PieceNames.darkBishop, PieceNames.darkQueen,
+           PieceNames.darkKing, PieceNames.darkBishop, PieceNames.darkKnight, PieceNames.darkRook],
         [PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn,
            PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn, PieceNames.darkPawn],
         [PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty, PieceNames.empty,
@@ -42,31 +43,34 @@ export const initBoardState = () : BoardState =>
  */
 export const calculatePossibleMoves = (board: BoardState, selectedCell: number) : number[] =>{
   let validMoves: number[] = [];
-  switch (getPieceName(board, selectedCell)){
+  let row = Math.floor(selectedCell / 8);
+  console.log("ROOOOOW: " + selectedCell);
+  let col = selectedCell % 8;
+  switch (board.board[row][col]){
       case PieceNames.darkPawn :
-        return calculateDarkPawnMoves(board, selectedCell);
+        return calculateDarkPawnMoves(board, [row,col]);
       case PieceNames.darkRook :
-        return calculateRookMoves(board, selectedCell);
+        return calculateRookMoves(board, [row,col]);
       case PieceNames.darkKnight :
-        return calculateKnightMoves(board, selectedCell);
+        return calculateKnightMoves(board, [row,col]);
       case PieceNames.darkBishop :
-        return calculateBishopMoves(board, selectedCell);
+        return calculateBishopMoves(board, [row,col]);
       case PieceNames.darkKing :
-        return calculateKingMoves(board, selectedCell);
+        return calculateKingMoves(board, [row,col]);
       case PieceNames.darkQueen :
-          return calculateQueenMoves(board, selectedCell);
+          return calculateQueenMoves(board, [row,col]);
       case PieceNames.lightPawn :
-        return calculateLightPawnMoves(board, selectedCell);
+        return calculateLightPawnMoves(board, [row,col]);
       case PieceNames.lightRook :
-        return calculateRookMoves(board, selectedCell);
+        return calculateRookMoves(board, [row,col]);
       case PieceNames.lightKnight :
-        return calculateKnightMoves(board, selectedCell);
+        return calculateKnightMoves(board, [row,col]);
       case PieceNames.lightBishop :
-        return calculateBishopMoves(board, selectedCell);
+        return calculateBishopMoves(board, [row,col]);
       case PieceNames.lightKing :
-          return calculateKingMoves(board, selectedCell);
+          return calculateKingMoves(board, [row,col]);
       case PieceNames.lightQueen :
-        return calculateQueenMoves(board, selectedCell);
+        return calculateQueenMoves(board, [row,col]);
       default :
           return validMoves;
   }
@@ -77,15 +81,16 @@ export const calculatePossibleMoves = (board: BoardState, selectedCell: number) 
  * @param board 
  * @param selectedCell 
  */
-const calculateLightPawnMoves = (board: BoardState, selectedCell: number) : number[] =>{
+const calculateLightPawnMoves = (board: BoardState, index: [number, number]) : number[] =>{
     let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
-    for(let i = 0; i < 2; i ++)
+    let [row,col] = index;
+    console.log("FOOOKS");
+    for(let i = 1; i < 3; i++)
     {
+        console.log(row+i);
         //TODO: check for pawn first move
-        if(!isConflict(board, [row+i,col], board.board[row+i][col]))
-            validMoves.push((row+i) * boardSize + col);
+        if(!isConflict(board, [row,col], [row-i, col]))
+            validMoves.push((row-i) * boardSize + col);
     }
     return validMoves;
 }
@@ -95,15 +100,15 @@ const calculateLightPawnMoves = (board: BoardState, selectedCell: number) : numb
  * @param board 
  * @param selectedCell 
  */
-const calculateDarkPawnMoves = (board: BoardState, selectedCell: number) : number[] =>{
+const calculateDarkPawnMoves = (board: BoardState, index: [number, number]) : number[] =>{
     let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
-    for(let i = 0; i < 2; i ++)
+    let [row,col] = index;
+
+    for(let i = 1; i < 3; i ++)
     {
         //TODO: check for pawn first move
-        if(!isConflict(board, [row,col+i], board.board[row][col+i]))
-            validMoves.push(row * boardSize + col + i);
+        if(!isConflict(board, [row,col], [row + i, col]))
+            validMoves.push((row+i) * boardSize + col);
     }
     return validMoves;
 }
@@ -114,8 +119,8 @@ const calculateDarkPawnMoves = (board: BoardState, selectedCell: number) : numbe
  * @param selectedCell 
  * @returns 
  */
-const calculateRookMoves = (board: BoardState, selectedCell: number) : number[] =>{
-    return calculateRowMoves(board,[],selectedCell);
+const calculateRookMoves = (board: BoardState, index: [number, number]) : number[] =>{
+    return calculateRowMoves(board,[],index);
 }
 
 /**
@@ -123,8 +128,8 @@ const calculateRookMoves = (board: BoardState, selectedCell: number) : number[] 
  * @param board 
  * @param selectedCell 
  */
-const calculateBishopMoves = (board: BoardState, selectedCell: number) : number[] =>{
-    return calculateDiagMoves(board,[],selectedCell);
+const calculateBishopMoves = (board: BoardState, index: [number, number]) : number[] =>{
+    return calculateDiagMoves(board,[],index);
 }
 
 /**
@@ -132,10 +137,10 @@ const calculateBishopMoves = (board: BoardState, selectedCell: number) : number[
  * @param board 
  * @param selectedCell 
  */
-const calculateQueenMoves = (board: BoardState, selectedCell: number) : number[] => {
+const calculateQueenMoves = (board: BoardState, index: [number, number]) : number[] => {
     let validMoves: number[] = [];
-    calculateRowMoves(board, validMoves, selectedCell);
-    calculateDiagMoves(board, validMoves, selectedCell);
+    calculateRowMoves(board, validMoves, index);
+    calculateDiagMoves(board, validMoves, index);
     return validMoves;
 }
 
@@ -144,34 +149,33 @@ const calculateQueenMoves = (board: BoardState, selectedCell: number) : number[]
  * @param board 
  * @param selectedCell 
  */
-const calculateKingMoves = (board: BoardState, selectedCell: number) : number[] => {
+const calculateKingMoves = (board: BoardState, index: [number, number]) : number[] => {
     let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
+    let [row,col] = index;
     //TODO: gotta have some system to validate moves against potential check situations
     //right square
-    if(!isConflict(board, [row,col+1], board.board[row][col+1]))
+    if(!isConflict(board, [row,col], [row, col+1]))
         validMoves.push(row * boardSize + col + 1);
     //right upper diag square
-    if(!isConflict(board, [row+1,col+1], board.board[row+1][col+1]))
+    if(!isConflict(board, [row,col], [row+1, col+1]))
         validMoves.push((row+1) * boardSize + col + 1);
     //upper square
-    if(!isConflict(board, [row+1,col], board.board[row+1][col]))
+    if(!isConflict(board, [row,col], [row+1, col]))
         validMoves.push((row+1) * boardSize + col );
     //left square
-    if(!isConflict(board, [row,col-1], board.board[row][col-1]))
+    if(!isConflict(board, [row,col], [row, col-1]))
         validMoves.push(row * boardSize + col + 1);
     //lower left diag square
-    if(!isConflict(board, [row-1,col-1], board.board[row-1][col-1]))
+    if(!isConflict(board, [row,col], [row-1, col-1]))
         validMoves.push((row-1) * boardSize + col - 1);
     //upper left diag square
-    if(!isConflict(board, [row+1,col-1], board.board[row+1][col-1]))
+    if(!isConflict(board, [row,col], [row+1, col-1]))
         validMoves.push((row+1) * boardSize + col - 1);
     //lower right diag square
-    if(!isConflict(board, [row-1,col+1], board.board[row-1][col+1]))
+    if(!isConflict(board, [row,col], [row-1, col+1]))
         validMoves.push((row-1) * boardSize + col + 1);
     //lower square
-    if(!isConflict(board, [row-1,col], board.board[row-1][col]))
+    if(!isConflict(board, [row,col], [row-1, col]))
         validMoves.push((row-1) * boardSize + col);
     return validMoves;
 }
@@ -181,36 +185,127 @@ const calculateKingMoves = (board: BoardState, selectedCell: number) : number[] 
  * @param board 
  * @param selectedCell 
  */
-const calculateKnightMoves = (board: BoardState, selectedCell: number) : number[] => {
+const calculateKnightMoves = (board: BoardState, index: [number, number]) : number[] => {
     let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
+    let [row,col] = index;
     //
-    if(!isConflict(board, [row+2,col+1], board.board[row+2][col+1]))
+    if(!isConflict(board, [row,col], [row+2, col+1]))
         validMoves.push((row+2) * boardSize + col + 1);
     //
-    if(!isConflict(board, [row+2,col-1], board.board[row+2][col-1]))
+    if(!isConflict(board, [row,col], [row+2, col-1]))
         validMoves.push((row+2) * boardSize + col + 1);
     //
-    if(!isConflict(board, [row+1,col-2], board.board[row+1][col-2]))
+    if(!isConflict(board, [row,col], [row+1, col-2]))
         validMoves.push((row+1) * boardSize + col - 2 );
     //
-    if(!isConflict(board, [row-1,col-2], board.board[row-1][col-2]))
+    if(!isConflict(board, [row,col], [row-1, col-2]))
         validMoves.push((row-1) * boardSize + col - 1);
     //
-    if(!isConflict(board, [row-2,col-1], board.board[row-2][col-1]))
+    if(!isConflict(board, [row,col], [row-2, col-1]))
         validMoves.push((row-2) * boardSize + col - 1);
     //
-    if(!isConflict(board, [row-2,col+1], board.board[row+1][col+1]))
+    if(!isConflict(board, [row,col], [row+1, col+1]))
         validMoves.push((row-2) * boardSize + col + 1);
     //
-    if(!isConflict(board, [row-1,col-2], board.board[row-1][col-2]))
+    if(!isConflict(board, [row,col], [row-1, col-2]))
         validMoves.push((row-1) * boardSize + col - 2);
     //
-    if(!isConflict(board, [row+1,col-2], board.board[row+1][col-2]))
+    if(!isConflict(board, [row,col], [row+1, col-2]))
         validMoves.push((row+1) * boardSize + col - 2);
     return validMoves;
 }
+
+
+/**
+ * Calculates row moves for some potential ethereal all row all the time piece
+ * @param board 
+ * @param possibleMoves 
+ * @param index 
+ * @returns 
+ */
+const calculateRowMoves = (board: BoardState, possibleMoves: number[], index: [number, number]): number[] => 
+{
+    let validMoves: number[] = [];
+    let [row,col] = index;
+
+    //calculate upward moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row+i, col]))
+            break;
+        validMoves.push((row+i) * boardSize + col);
+    }
+
+    //calculate right moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row, col+i]))
+            break;
+        validMoves.push(row * boardSize + col + i);
+    }
+
+    //calculate down moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row-i, col]))
+            break;
+        validMoves.push((row-i) * boardSize + col);
+    }
+
+    //calculate left moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row, col-i]))
+            break;
+        validMoves.push(row * boardSize + col - i);
+    }
+
+    return validMoves;
+}
+
+/**
+ * Calculates diagonal moves for some potential ethereal all diagonal all the time piece
+ * @param board 
+ * @param possibleMoves 
+ * @param index 
+ * @returns 
+ */
+const calculateDiagMoves = (board: BoardState, possibleMoves: number[], index: [number, number]): number[] => 
+{
+    let validMoves: number[] = [];
+    let [row,col] = index;
+
+    //calculate right diagonal upward moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row+i, col+i]))
+            break;
+        validMoves.push((row+i) * boardSize + col + i);
+    }
+    //calculate left diagonal downward moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row-i, col-i]))
+            break;
+        validMoves.push((row-i) * boardSize - col - i);
+    }
+    //calculate left diagonal upward moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row+i, col-i]))
+            break;
+        validMoves.push((row+i) * boardSize + col - i);
+    }
+    //calculate right diagonal downward moves
+    for(let i = 1; i < 8; i++)
+    {
+        if(isConflict(board, [row,col], [row-i, col+i]))
+            break;
+        validMoves.push((row-i) * boardSize - col + i);
+    }
+    return validMoves;
+}
+
 
 /**
  * Returns true if a conflict is detected. A conflict would be that the move is out of bounds,
@@ -220,15 +315,20 @@ const calculateKnightMoves = (board: BoardState, selectedCell: number) : number[
  * @param selectedPiece 
  * @returns 
  */
-const isConflict = (board: BoardState, index: [number, number], selectedPiece: string): boolean => {
-    let [i, j] = index;
-    let piece = board.board[i][j];
-    if(i < 0 || i > 7 || j < 0 || j > 7) 
+const isConflict = (board: BoardState, index: [number, number], selectedPiece: [number, number]): boolean => {
+    let [curRow, curCol] = index;
+    let [checkRow, checkCol] = selectedPiece;
+    let piece = board.board[curRow][curCol];
+
+    if(checkRow < 0 || checkRow > 7 || checkCol < 0 || checkCol > 7) 
         return true;
-    else if(isLightPiece(piece) && isLightPiece(selectedPiece)){
+    
+    let checkPiece = board.board[checkRow][checkCol];
+    
+    if(isLightPiece(piece) && isLightPiece(checkPiece)){
         return true;
     }
-    else if(!isLightPiece(piece) && !isLightPiece(selectedPiece)){
+    else if(isDarkPiece(piece) && isDarkPiece(checkPiece)){
         return true;
     }
     return false;
@@ -257,92 +357,25 @@ const isLightPiece = (piece: string): boolean => {
     }
 }
 
-const calculateRowMoves = (board: BoardState, possibleMoves: number[], selectedCell: number): number[] => 
-{
-    let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
-
-    //calculate upward moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row+i,col], board.board[row+i][col]))
-            break;
-        validMoves.push((row+i) * boardSize + col);
-    }
-
-    //calculate right moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row,col+i], board.board[row][col+i]))
-            break;
-        validMoves.push(row * boardSize + col + i);
-    }
-
-    //calculate down moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row-i,col], board.board[row-i][col]))
-            break;
-        validMoves.push((row-i) * boardSize + col);
-    }
-
-    //calculate left moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row,col-i], board.board[row][col-i]))
-            break;
-        validMoves.push(row * boardSize + col - i);
-    }
-
-    return validMoves;
-}
-
-const calculateDiagMoves = (board: BoardState, possibleMoves: number[], selectedCell: number): number[] => 
-{
-    let validMoves: number[] = [];
-    let row = selectedCell / 8;
-    let col = selectedCell % 8;
-    //calculate right diagonal upward moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row+i,col+i], board.board[row+i][col+i]))
-            break;
-        validMoves.push((row+i) * boardSize + col + i);
-    }
-    //calculate left diagonal downward moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row-i,col-i], board.board[row-i][col-i]))
-            break;
-        validMoves.push((row-i) * boardSize - col - i);
-    }
-    //calculate left diagonal upward moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row+i,col-i], board.board[row+i][col-i]))
-            break;
-        validMoves.push((row+i) * boardSize + col - i);
-    }
-    //calculate right diagonal downward moves
-    for(let i = 1; i < 8; i++)
-    {
-        if(isConflict(board, [row-i,col+i], board.board[row-i][col+i]))
-            break;
-        validMoves.push((row-i) * boardSize - col + i);
-    }
-    return validMoves;
-}
-
-
 /**
- * 
- * @param board 
- * @param selectedCell 
+ * Checks a selected piece is dark
+ * @param piece 
  * @returns 
  */
-const getPieceName = (board: BoardState, selectedCell: number) : string =>{
-    let i = selectedCell / 8;
-    let j = selectedCell % 8;
-    return board.board[i][j];
+const isDarkPiece = (piece: string): boolean => {
+    switch(piece){
+        case PieceNames.darkPawn :
+            return true;
+        case PieceNames.darkRook :
+            return true;
+        case PieceNames.darkKnight :
+            return true;
+        case PieceNames.darkBishop :
+            return true;
+        case PieceNames.darkKing :
+            return true;
+        case PieceNames.darkQueen :
+        default:
+            return false;
+    }
 }

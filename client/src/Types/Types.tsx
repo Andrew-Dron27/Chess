@@ -10,6 +10,8 @@ export type BoardState = {
 export type CellProps = {
     id : number
     currentPiece: string
-    selectedCell: number
+    isSelected: boolean,
+    currentColor: string,
+    onClick: () => void,
     selectCallBack: (id: number, piece: string) => void
 }
