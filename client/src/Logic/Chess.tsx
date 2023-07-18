@@ -32,10 +32,61 @@ class Chess{
         return state;
     }
 
+    /**
+     * Translates board id into row and column indeces
+     * @param id 
+     * @returns 
+     */
     static idToRowAndCol = (id: number): [number, number] =>{
         let row = Math.floor(id / 8);
         let col = id % 8;
         return [row,col];
+    }
+
+    static logChessMove = (board: BoardState, newIndex : [number, number], oldIndex: [number, number]): string =>{
+        let [newRow, newCol] = newIndex;
+        let [oldRow, oldCol] = oldIndex;
+        return `Moving ${board.board[oldCol][oldRow]} from ${this.getColName(oldCol)}${this.getRowName(oldRow)}
+            to ${this.getColName(newCol)}${this.getRowName(newRow)}`
+    }
+
+    static getRowName = (row: number): string =>{
+        return (boardSize - row).toString();
+    }
+
+    static getColName = (col: number): string =>{
+        switch(col){
+            case 0: 
+                return 'A';
+            case 1:
+                return 'B';
+            case 2:
+                return 'C';
+            case 3:
+                return 'D';
+            case 4:
+                return 'E';
+            case 5:
+                return 'F';
+            case 6:
+                return 'G';
+            case 7:
+                return 'H';
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Return true if king piece is in check
+     * @param board 
+     */
+    static isCheck = (board: BoardState): boolean =>{
+        let allMoves: number[] = [];
+        for(let i = 0; i < 64; i++){
+            allMoves.concat(Chess.calculatePossibleMoves(board,i));
+        }
+        return false;
     }
 
     /**
@@ -112,9 +163,9 @@ class Chess{
         //check in front
         if(!Chess.isConflict(board, [row,col], [row+1, col]) && !Chess.isOpposingPiece(board, [row,col], [row+1, col]))
             validMoves.push((row+1) * boardSize + col);
-        if(Chess.isOpposingPiece(board, [row,col], [row-1, col-1]))
+        if(Chess.isOpposingPiece(board, [row,col], [row+1, col-1]))
             validMoves.push((row+1) * boardSize + col - 1);
-        if(Chess.isOpposingPiece(board, [row,col], [row-1, col+1]))
+        if(Chess.isOpposingPiece(board, [row,col], [row+1, col+1]))
             validMoves.push((row+1) * boardSize + col + 1);
         //if starting position check two spaces ahead
         if(row == 1){

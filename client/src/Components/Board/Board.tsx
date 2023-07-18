@@ -13,8 +13,8 @@ const Board = () => {
     const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
     const [possibleMoves, setPossibleMoves] = useState<number[]>([]);
     const [isLightTurn, setisLightTurn] = useState<boolean>(true);
-    const [lostLightPieces, setLostLightPieces] = useState<string[]>([]);
-    const [lostDarkPieces, setLostDarkPieces] = useState<string[]>([]);
+    const [capturedLightPieces, setCapturedLightPieces] = useState<string[]>([]);
+    const [capturedDarkPieces, setCapturedDarkPieces] = useState<string[]>([]);
 
     const determineColor = (id: number): string => {
       let row : number = Math.floor(id / 8);
@@ -48,24 +48,49 @@ const Board = () => {
     }
 
     const onCellClick = (id: number, clickedPiece: string, isPossibleMove: boolean) => {
-      if((Chess.isLightPiece(clickedPiece) && !isLightTurn) || (Chess.isDarkPiece(clickedPiece) && isLightTurn))
+      if((Chess.isLightPiece(clickedPiece) && !isLightTurn && !isPossibleMove) 
+      || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove))
+      {
+        console.log(isLightTurn);
         return;
-
+      }
+        
       setSelectedCell(id);
       setSelectedPiece(clickedPiece);
 
       if(isPossibleMove){
-        console.log("Moving Piece " + selectedPiece + " from: " + selectedCell + " to: " + id);
-        let newState = boardState.board;
+
+        let newState = boardState;
         let [row,col] = Chess.idToRowAndCol(id);
         let [prevRow, prevCol] = Chess.idToRowAndCol(selectedCell);
-        newState[row][col] = selectedPiece;
-        newState[prevRow][prevCol] = PieceNames.empty;
-        setSelectedPiece(selectedPiece);
+
+        console.log(boardState.board[prevRow][prevCol]);
+
+        console.log(Chess.logChessMove(boardState, [row, col], [prevRow, prevCol],));
+
+        if(Chess.isOpposingPiece(boardState,[row,col],[prevRow,prevCol]))
+        {
+          //piece is captured
+          if(Chess.isLightPiece(boardState.board[row][col]) && Chess.isDarkPiece(boardState.board[prevRow][prevCol])){
+            let lightPieces = capturedLightPieces;
+            lightPieces.push(boardState.board[row][col])
+            setCapturedLightPieces(lightPieces);
+          }
+          else if(Chess.isDarkPiece(boardState.board[row][col]) && Chess.isLightPiece(boardState.board[prevRow][prevCol])){
+            let darkPieces = capturedDarkPieces;
+            darkPieces.push(boardState.board[row][col])
+            setCapturedDarkPieces(darkPieces);
+          }
+        }
+
+        newState.board[row][col] = selectedPiece;
+        newState.board[prevRow][prevCol] = PieceNames.empty;
+        setBoardState(newState);
         setisLightTurn(!isLightTurn);
         setPossibleMoves([]);
         return;
       }
+
 
       if(id == -1)
         setPossibleMoves([]);
