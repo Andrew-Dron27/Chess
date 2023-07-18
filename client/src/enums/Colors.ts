@@ -2,7 +2,7 @@ enum Colors {
     brightCellColor = 'cornsilk',
     darkCellColor = 'burlywood',
     selectedCellColor = 'yellow',
-    hightlightedColor = 'green',
+    possibleMoveColor = 'green',
 }
 
 export default Colors;
