@@ -3,16 +3,18 @@ import Cell from "../Cell/Cell";
 import './Board.css';
 import PieceNames from "../../enums/PieceNames";
 import { BoardState } from "../../Types/Types";
-import { initBoardState, calculatePossibleMoves, idToRowAndCol } from "../../Logic/Chess";
+import Chess from "../../Logic/Chess";
 import Colors from "../../enums/Colors";
 
 const Board = () => {
 
-    const [boardState, setBoardState] = useState<BoardState>(initBoardState());
+    const [boardState, setBoardState] = useState<BoardState>(Chess.initBoardState());
     const [selectedCell, setSelectedCell] = useState<number>(-1);
     const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
     const [possibleMoves, setPossibleMoves] = useState<number[]>([]);
     const [isLightTurn, setisLightTurn] = useState<boolean>(true);
+    const [lostLightPieces, setLostLightPieces] = useState<string[]>([]);
+    const [lostDarkPieces, setLostDarkPieces] = useState<string[]>([]);
 
     const determineColor = (id: number): string => {
       let row : number = Math.floor(id / 8);
@@ -46,29 +48,35 @@ const Board = () => {
     }
 
     const onCellClick = (id: number, clickedPiece: string, isPossibleMove: boolean) => {
-        setSelectedCell(id);
-        setSelectedPiece(clickedPiece);
+      if((Chess.isLightPiece(clickedPiece) && !isLightTurn) || (Chess.isDarkPiece(clickedPiece) && isLightTurn))
+        return;
 
-        if(isPossibleMove){
-          console.log("Moving Piece " + selectedPiece + " from: " + selectedCell + " to: " + id);
-          let newState = boardState.board;
-          let [row,col] = idToRowAndCol(id);
-          let [prevRow, prevCol] = idToRowAndCol(selectedCell);
-          newState[row][col] = selectedPiece;
-          newState[prevRow][prevCol] = PieceNames.empty;
-          setSelectedPiece(selectedPiece);
-        }
+      setSelectedCell(id);
+      setSelectedPiece(clickedPiece);
 
-        if(id == -1)
-          setPossibleMoves([]);
-        else
-        {
-          let moves = calculatePossibleMoves(boardState, id)
-          setPossibleMoves(moves);
-          console.log(moves);
-        }
+      if(isPossibleMove){
+        console.log("Moving Piece " + selectedPiece + " from: " + selectedCell + " to: " + id);
+        let newState = boardState.board;
+        let [row,col] = Chess.idToRowAndCol(id);
+        let [prevRow, prevCol] = Chess.idToRowAndCol(selectedCell);
+        newState[row][col] = selectedPiece;
+        newState[prevRow][prevCol] = PieceNames.empty;
+        setSelectedPiece(selectedPiece);
+        setisLightTurn(!isLightTurn);
+        setPossibleMoves([]);
+        return;
+      }
+
+      if(id == -1)
+        setPossibleMoves([]);
+      else
+      {
+        let moves = Chess.calculatePossibleMoves(boardState, id)
+        setPossibleMoves(moves);
+      }
+      
     }
-    
+
     const board = [];
     for(let i = 0; i < 8; i++)
     {

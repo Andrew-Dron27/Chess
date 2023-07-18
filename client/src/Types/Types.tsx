@@ -4,7 +4,6 @@ export type BoardProps = {
 
 export type BoardState = {
   board: (string) [][],
-  firstPawns: (boolean) [][];
 }
 
 export type CellProps = {
