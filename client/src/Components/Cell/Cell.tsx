@@ -10,17 +10,18 @@ const Cell = (props: CellProps) => {
     let className : string = 'Cell';
 
     const originalColor = props.currentColor;
-    const [currentPiece, setCurrentPiece] = useState(props.currentPiece);
+    const [currentPiece, setCurrentPiece] = useState(getPieceImageSrc(props.currentPiece));
     const [backgroundColor, setBackgroundColor] = useState(props.currentColor);
 
     useEffect(() => {
+        setCurrentPiece(getPieceImageSrc(props.currentPiece));
         if(props.isSelected)
         {
             setBackgroundColor(props.currentColor);
         }
-        else if(props.isHighlighted)
+        else if(props.isPossibleMove)
         {
-            setBackgroundColor(Colors.hightlightedColor);
+            setBackgroundColor(Colors.possibleMoveColor);
         }
         else
         {
@@ -33,7 +34,7 @@ const Cell = (props: CellProps) => {
       <td className= {className}
         id={props.id.toString()} onClick={() => {props.onClick()}}
         style={{backgroundColor: backgroundColor}}>
-            <img src={getPieceImageSrc(currentPiece)} className='image' alt="" />
+            <img src={currentPiece} className='image' alt="" />
         </td>
     )
 }

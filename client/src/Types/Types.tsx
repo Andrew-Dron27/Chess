@@ -11,8 +11,7 @@ export type CellProps = {
     id : number
     currentPiece: string
     isSelected: boolean,
-    isHighlighted: boolean,
+    isPossibleMove: boolean,
     currentColor: string,
     onClick: () => void,
-    selectCallBack: (id: number, piece: string) => void
 }

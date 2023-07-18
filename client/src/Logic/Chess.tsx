@@ -34,6 +34,12 @@ export const initBoardState = () : BoardState =>
     return state;
 }
 
+export const idToRowAndCol = (id: number): [number, number] =>{
+    let row = Math.floor(id / 8);
+    let col = id % 8;
+    return [row,col];
+}
+
 /**
  * Given a current board state, and a current selected cell, returns an array
  * with all valid move locations possible for the selected piece.
@@ -42,38 +48,36 @@ export const initBoardState = () : BoardState =>
  * @returns 
  */
 export const calculatePossibleMoves = (board: BoardState, selectedCell: number) : number[] =>{
-  let validMoves: number[] = [];
-  let row = Math.floor(selectedCell / 8);
-  console.log("ROOOOOW: " + selectedCell);
-  let col = selectedCell % 8;
-  switch (board.board[row][col]){
-      case PieceNames.darkPawn :
-        return calculateDarkPawnMoves(board, [row,col]);
-      case PieceNames.darkRook :
-        return calculateRookMoves(board, [row,col]);
-      case PieceNames.darkKnight :
-        return calculateKnightMoves(board, [row,col]);
-      case PieceNames.darkBishop :
-        return calculateBishopMoves(board, [row,col]);
-      case PieceNames.darkKing :
-        return calculateKingMoves(board, [row,col]);
-      case PieceNames.darkQueen :
-          return calculateQueenMoves(board, [row,col]);
-      case PieceNames.lightPawn :
-        return calculateLightPawnMoves(board, [row,col]);
-      case PieceNames.lightRook :
-        return calculateRookMoves(board, [row,col]);
-      case PieceNames.lightKnight :
-        return calculateKnightMoves(board, [row,col]);
-      case PieceNames.lightBishop :
-        return calculateBishopMoves(board, [row,col]);
-      case PieceNames.lightKing :
-          return calculateKingMoves(board, [row,col]);
-      case PieceNames.lightQueen :
-        return calculateQueenMoves(board, [row,col]);
-      default :
-          return validMoves;
-  }
+    let validMoves: number[] = [];
+    let [row,col] = idToRowAndCol(selectedCell);
+    switch (board.board[row][col]){
+        case PieceNames.darkPawn :
+            return calculateDarkPawnMoves(board, [row,col]);
+        case PieceNames.darkRook :
+            return calculateRookMoves(board, [row,col]);
+        case PieceNames.darkKnight :
+            return calculateKnightMoves(board, [row,col]);
+        case PieceNames.darkBishop :
+            return calculateBishopMoves(board, [row,col]);
+        case PieceNames.darkKing :
+            return calculateKingMoves(board, [row,col]);
+        case PieceNames.darkQueen :
+            return calculateQueenMoves(board, [row,col]);
+        case PieceNames.lightPawn :
+            return calculateLightPawnMoves(board, [row,col]);
+        case PieceNames.lightRook :
+            return calculateRookMoves(board, [row,col]);
+        case PieceNames.lightKnight :
+            return calculateKnightMoves(board, [row,col]);
+        case PieceNames.lightBishop :
+            return calculateBishopMoves(board, [row,col]);
+        case PieceNames.lightKing :
+            return calculateKingMoves(board, [row,col]);
+        case PieceNames.lightQueen :
+            return calculateQueenMoves(board, [row,col]);
+        default :
+            return validMoves;
+    }
 }
 
 /**
@@ -84,13 +88,14 @@ export const calculatePossibleMoves = (board: BoardState, selectedCell: number) 
 const calculateLightPawnMoves = (board: BoardState, index: [number, number]) : number[] =>{
     let validMoves: number[] = [];
     let [row,col] = index;
-    console.log("FOOOKS");
     for(let i = 1; i < 3; i++)
     {
         console.log(row+i);
         //TODO: check for pawn first move
         if(!isConflict(board, [row,col], [row-i, col]))
             validMoves.push((row-i) * boardSize + col);
+        if(isOpposingPiece(board, [row,col], [row-i, col]))
+            break;
     }
     return validMoves;
 }
@@ -109,6 +114,8 @@ const calculateDarkPawnMoves = (board: BoardState, index: [number, number]) : nu
         //TODO: check for pawn first move
         if(!isConflict(board, [row,col], [row + i, col]))
             validMoves.push((row+i) * boardSize + col);
+        if(isOpposingPiece(board, [row,col], [row+i, col]))
+            break;
     }
     return validMoves;
 }
@@ -138,10 +145,7 @@ const calculateBishopMoves = (board: BoardState, index: [number, number]) : numb
  * @param selectedCell 
  */
 const calculateQueenMoves = (board: BoardState, index: [number, number]) : number[] => {
-    let validMoves: number[] = [];
-    calculateRowMoves(board, validMoves, index);
-    calculateDiagMoves(board, validMoves, index);
-    return validMoves;
+    return calculateRowMoves(board, [], index).concat(calculateDiagMoves(board, [], index));
 }
 
 /**
@@ -234,6 +238,9 @@ const calculateRowMoves = (board: BoardState, possibleMoves: number[], index: [n
         if(isConflict(board, [row,col], [row+i, col]))
             break;
         validMoves.push((row+i) * boardSize + col);
+
+        if(isOpposingPiece(board, [row,col], [row+i, col]))
+            break;
     }
 
     //calculate right moves
@@ -242,6 +249,9 @@ const calculateRowMoves = (board: BoardState, possibleMoves: number[], index: [n
         if(isConflict(board, [row,col], [row, col+i]))
             break;
         validMoves.push(row * boardSize + col + i);
+
+        if(isOpposingPiece(board, [row,col], [row, col+i]))
+            break;
     }
 
     //calculate down moves
@@ -250,6 +260,9 @@ const calculateRowMoves = (board: BoardState, possibleMoves: number[], index: [n
         if(isConflict(board, [row,col], [row-i, col]))
             break;
         validMoves.push((row-i) * boardSize + col);
+
+        if(isOpposingPiece(board, [row,col], [row-i, col]))
+            break;
     }
 
     //calculate left moves
@@ -258,6 +271,9 @@ const calculateRowMoves = (board: BoardState, possibleMoves: number[], index: [n
         if(isConflict(board, [row,col], [row, col-i]))
             break;
         validMoves.push(row * boardSize + col - i);
+
+        if(isOpposingPiece(board, [row,col], [row, col-i]))
+            break;
     }
 
     return validMoves;
@@ -281,13 +297,19 @@ const calculateDiagMoves = (board: BoardState, possibleMoves: number[], index: [
         if(isConflict(board, [row,col], [row+i, col+i]))
             break;
         validMoves.push((row+i) * boardSize + col + i);
+
+        if(isOpposingPiece(board, [row,col], [row+i, col+i]))
+            break;
     }
     //calculate left diagonal downward moves
     for(let i = 1; i < 8; i++)
     {
         if(isConflict(board, [row,col], [row-i, col-i]))
             break;
-        validMoves.push((row-i) * boardSize - col - i);
+        validMoves.push((row-i) * boardSize + col - i);
+
+        if(isOpposingPiece(board, [row,col], [row-i, col-i]))
+            break;
     }
     //calculate left diagonal upward moves
     for(let i = 1; i < 8; i++)
@@ -295,13 +317,19 @@ const calculateDiagMoves = (board: BoardState, possibleMoves: number[], index: [
         if(isConflict(board, [row,col], [row+i, col-i]))
             break;
         validMoves.push((row+i) * boardSize + col - i);
+
+        if(isOpposingPiece(board, [row,col], [row+i, col-i]))
+            break;
     }
     //calculate right diagonal downward moves
     for(let i = 1; i < 8; i++)
     {
         if(isConflict(board, [row,col], [row-i, col+i]))
             break;
-        validMoves.push((row-i) * boardSize - col + i);
+        validMoves.push((row-i) * boardSize + col + i);
+
+        if(isOpposingPiece(board, [row,col], [row-i, col+i]))
+            break;
     }
     return validMoves;
 }
@@ -383,4 +411,20 @@ const isDarkPiece = (piece: string): boolean => {
         default:
             return false;
     }
+}
+
+const isOpposingPiece = (board: BoardState, index: [number, number], selectedPiece: [number, number]) =>
+{
+    let [curRow, curCol] = index;
+    let [checkRow, checkCol] = selectedPiece;
+    let piece = board.board[curRow][curCol];
+
+    if(checkRow < 0 || checkRow > 7 || checkCol < 0 || checkCol > 7) 
+        return false;//saftey
+
+    let checkPiece = board.board[checkRow][checkCol];
+    if((isDarkPiece(piece) && isLightPiece(checkPiece)) || (isLightPiece(piece) && isDarkPiece(checkPiece))){
+        return true;
+    }
+    return false;
 }
