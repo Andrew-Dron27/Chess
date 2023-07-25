@@ -1,0 +1,7 @@
+div.status{
+    width: max-content;
+    background-color: grey;
+}
+.ul.log{
+    list-style-type: square;
+}

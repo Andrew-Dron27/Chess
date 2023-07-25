@@ -1,3 +1,4 @@
+import { Console } from "console";
 import { BoardState } from "../Types/Types";
 import PieceNames from "../enums/PieceNames";
 
@@ -32,10 +33,164 @@ class Chess{
         return state;
     }
 
+    /**
+     * Translates board id into row and column indeces
+     * @param id 
+     * @returns 
+     */
     static idToRowAndCol = (id: number): [number, number] =>{
         let row = Math.floor(id / 8);
         let col = id % 8;
         return [row,col];
+    }
+
+    /**
+     * Constructs a string log message for a chess move
+     * @param board 
+     * @param newIndex 
+     * @param oldIndex 
+     * @returns 
+     */
+    static logChessMove = (board: BoardState, newIndex : [number, number], oldIndex: [number, number]): string =>{
+        let [newRow, newCol] = newIndex;
+        let [oldRow, oldCol] = oldIndex;
+        return `Moving ${board.board[oldRow][oldCol]} from ${this.getColName(oldCol)}${this.getRowName(oldRow)}
+            to ${this.getColName(newCol)}${this.getRowName(newRow)}`
+    }
+
+       /**
+     * Constructs a string log message for a chess capturing move
+     * @param board 
+     * @param newIndex 
+     * @param oldIndex 
+     * @returns 
+     */
+       static logChessCaptureMove = (board: BoardState, capturedIdx : [number, number]): string =>{
+        let [capRow, capCol] = capturedIdx;
+        return `${board.board[capRow][capCol]} Has been captured!!`;
+    }
+
+    /**
+     * Convert Board row index into standard chess nomenclature
+     * @param row 
+     * @returns 
+     */
+    static getRowName = (row: number): string =>{
+        return (boardSize - row).toString();
+    }
+
+    /**
+     * kastar molotov med blommer som jag var en Banksey
+     * @param col 
+     * @returns 
+     */
+    static getColName = (col: number): string =>{
+        switch(col){
+            case 0: 
+                return 'A';
+            case 1:
+                return 'B';
+            case 2:
+                return 'C';
+            case 3:
+                return 'D';
+            case 4:
+                return 'E';
+            case 5:
+                return 'F';
+            case 6:
+                return 'G';
+            case 7:
+                return 'H';
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Returns the location of the king on the opposing
+     * @param board 
+     * @param selectedCell 
+     * @returns 
+     */
+    static getOpposingKingLoc = (board: BoardState, selectedCell: number): [number, number] =>{
+        let [row, col] = Chess.idToRowAndCol(selectedCell);
+        let darkKingLoc: [number,number] = [0,0];
+        let lightKingLoc: [number, number] = [0,0];
+        for(let i = 0; i < boardSize; i++){
+            for(let j = 0; j < boardSize; j++){
+                if(board.board[i][j] === PieceNames.darkKing){
+                    darkKingLoc = [i,j];
+                }
+                else if(board.board[i][j] === PieceNames.lightKing){
+                    lightKingLoc = [i,j];
+                }
+            }
+        }
+        if(this.isDarkPiece(board.board[row][col])){
+            return lightKingLoc;
+        }
+        else{
+            return darkKingLoc;
+        }   
+    }
+
+    /**
+     * Return true if opposing king is in threatened
+     * @param board 
+     * @param selectedCell 
+     * @param moves 
+     * @returns 
+     */
+    static isCheck = (board: BoardState, selectedCell: number, moves: number[]): boolean => {
+        let [kingRow, kingCol] = this.getOpposingKingLoc(board, selectedCell);
+        if(moves.find((x) => x === kingRow * boardSize + kingCol) != undefined){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Return true if king is threatened and unable to escape it within the next turn
+     * TODO: This isnt going to work and it will be difficult to fix
+     * (ie: how do you check that another piece can move to block the current threat to its king?)
+     * @param board 
+     */
+    static isCheckMate = (board: BoardState, kingCell: number): boolean =>{
+        let allMoves: number[] = [];
+        let [row, col] = Chess.idToRowAndCol(kingCell);
+        let kingMoves: number[] = Chess.calculatePossibleMoves(board, kingCell);
+        //light king
+        if(Chess.isDarkPiece(board.board[row][col])){
+            for(let i = 0; i < 64; i++){
+                [row, col] = Chess.idToRowAndCol(i);
+                //dont count the current kings and empty moves
+                if(board.board[row][col] === PieceNames.empty || i === kingCell)
+                    continue;
+                if(Chess.isLightPiece(board.board[row][col])){
+                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
+                }
+            }
+        }
+        //dark king
+        else {
+            for(let i = 0; i < 64; i++){
+                [row, col] = Chess.idToRowAndCol(i);
+                //dont count the current kings and empty moves
+                if(board.board[row][col] === PieceNames.empty || i === kingCell)
+                    continue;
+                if(Chess.isDarkPiece(board.board[row][col])){
+                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
+                }
+            }
+        }
+
+        kingMoves.forEach((move) => {
+            if(allMoves.find((x) => x === move)){
+                return true;
+            }
+        })
+        return false;
     }
 
     /**
@@ -95,7 +250,7 @@ class Chess{
         if(Chess.isOpposingPiece(board, [row,col], [row-1, col+1]))
             validMoves.push((row-1) * boardSize + col + 1);
         //if starting position check two spaces ahead
-        if(row == 6){
+        if(row === 6){
             validMoves.push((row-2) * boardSize + col);
         }
         return validMoves;
@@ -112,12 +267,12 @@ class Chess{
         //check in front
         if(!Chess.isConflict(board, [row,col], [row+1, col]) && !Chess.isOpposingPiece(board, [row,col], [row+1, col]))
             validMoves.push((row+1) * boardSize + col);
-        if(Chess.isOpposingPiece(board, [row,col], [row-1, col-1]))
+        if(Chess.isOpposingPiece(board, [row,col], [row+1, col-1]))
             validMoves.push((row+1) * boardSize + col - 1);
-        if(Chess.isOpposingPiece(board, [row,col], [row-1, col+1]))
+        if(Chess.isOpposingPiece(board, [row,col], [row+1, col+1]))
             validMoves.push((row+1) * boardSize + col + 1);
         //if starting position check two spaces ahead
-        if(row == 1){
+        if(row === 1){
             validMoves.push((row+2) * boardSize + col);
         }
         return validMoves;
@@ -206,7 +361,7 @@ class Chess{
             validMoves.push((row+1) * boardSize + col - 2 );
         //
         if(!Chess.isConflict(board, [row,col], [row-1, col-2]))
-            validMoves.push((row-1) * boardSize + col - 1);
+            validMoves.push((row-1) * boardSize + col - 2);
         //
         if(!Chess.isConflict(board, [row,col], [row-2, col-1]))
             validMoves.push((row-2) * boardSize + col - 1);
@@ -356,7 +511,7 @@ class Chess{
         
         let checkPiece = board.board[checkRow][checkCol];
 
-        if(checkPiece == PieceNames.empty)
+        if(checkPiece === PieceNames.empty)
             return false;
         
         if(Chess.isLightPiece(piece) && Chess.isLightPiece(checkPiece)){
