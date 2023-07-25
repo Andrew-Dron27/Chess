@@ -14,3 +14,9 @@ export type CellProps = {
     currentColor: string,
     onClick: () => void,
 }
+
+export type StatusProps = {
+  log: string[],
+  isLightTurn: boolean,
+  isCheck: boolean,
+}

@@ -5,6 +5,7 @@ import PieceNames from "../../enums/PieceNames";
 import { BoardState } from "../../Types/Types";
 import Chess from "../../Logic/Chess";
 import Colors from "../../enums/Colors";
+import Status from "../Status/Status";
 
 const Board = () => {
 
@@ -15,6 +16,8 @@ const Board = () => {
     const [isLightTurn, setisLightTurn] = useState<boolean>(true);
     const [capturedLightPieces, setCapturedLightPieces] = useState<string[]>([]);
     const [capturedDarkPieces, setCapturedDarkPieces] = useState<string[]>([]);
+    const [isCheck, setIsCheck] = useState<boolean>(false);
+    const [statusLog, setStatusLog] = useState<string[]>([]);
 
     const determineColor = (id: number): string => {
       let row : number = Math.floor(id / 8);
@@ -66,10 +69,11 @@ const Board = () => {
 
         console.log(boardState.board[prevRow][prevCol]);
 
-        console.log(Chess.logChessMove(boardState, [row, col], [prevRow, prevCol],));
+        setStatusLog(statusLog.concat(Chess.logChessMove(boardState, [row, col], [prevRow, prevCol])));
 
         if(Chess.isOpposingPiece(boardState,[row,col],[prevRow,prevCol]))
         {
+          setStatusLog(statusLog.concat(Chess.logChessCaptureMove(boardState, [row, col])))
           //piece is captured
           if(Chess.isLightPiece(boardState.board[row][col]) && Chess.isDarkPiece(boardState.board[prevRow][prevCol])){
             let lightPieces = capturedLightPieces;
@@ -88,6 +92,8 @@ const Board = () => {
         setBoardState(newState);
         setisLightTurn(!isLightTurn);
         setPossibleMoves([]);
+        setIsCheck(Chess.isCheck(boardState, selectedCell, Chess.calculatePossibleMoves(boardState,selectedCell)))
+        setIsCheck(true);
         return;
       }
 
@@ -132,11 +138,22 @@ const Board = () => {
         );
     }
     return(
-      <table id="Board">
-        <tbody>
-          {board}
-        </tbody> 
-      </table>
+      <div className="rowC">
+        <div id="Chess_Board" >
+          <table id="Board">
+            <tbody>
+              {board}
+            </tbody> 
+          </table>
+        </div>
+        <div id="Status_Log">
+          <Status 
+          log={statusLog}
+          isLightTurn={isLightTurn}
+          isCheck={isCheck}
+          />
+        </div>
+      </div>
     )
 }
 

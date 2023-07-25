@@ -1,3 +1,4 @@
+import { Console } from "console";
 import { BoardState } from "../Types/Types";
 import PieceNames from "../enums/PieceNames";
 
@@ -43,17 +44,46 @@ class Chess{
         return [row,col];
     }
 
+    /**
+     * Constructs a string log message for a chess move
+     * @param board 
+     * @param newIndex 
+     * @param oldIndex 
+     * @returns 
+     */
     static logChessMove = (board: BoardState, newIndex : [number, number], oldIndex: [number, number]): string =>{
         let [newRow, newCol] = newIndex;
         let [oldRow, oldCol] = oldIndex;
-        return `Moving ${board.board[oldCol][oldRow]} from ${this.getColName(oldCol)}${this.getRowName(oldRow)}
+        return `Moving ${board.board[oldRow][oldCol]} from ${this.getColName(oldCol)}${this.getRowName(oldRow)}
             to ${this.getColName(newCol)}${this.getRowName(newRow)}`
     }
 
+       /**
+     * Constructs a string log message for a chess capturing move
+     * @param board 
+     * @param newIndex 
+     * @param oldIndex 
+     * @returns 
+     */
+       static logChessCaptureMove = (board: BoardState, capturedIdx : [number, number]): string =>{
+        let [capRow, capCol] = capturedIdx;
+        return `${board.board[capRow][capCol]} Has been captured!!`;
+    }
+
+    /**
+     * Convert Board row index into standard chess nomenclature
+     * @param row 
+     * @returns 
+     */
     static getRowName = (row: number): string =>{
         return (boardSize - row).toString();
     }
 
+    /**
+     * kastar molotov med blommer som jag var en Banksey
+     * @param col 
+     * @returns 
+     */
     static getColName = (col: number): string =>{
         switch(col){
             case 0: 
@@ -105,7 +135,14 @@ class Chess{
         }   
     }
 
-    static isCheck = (board: BoardState, selectedCell: number, moves: [number]): boolean => {
+    /**
+     * Return true if opposing king is in threatened
+     * @param board 
+     * @param selectedCell 
+     * @param moves 
+     * @returns 
+     */
+    static isCheck = (board: BoardState, selectedCell: number, moves: number[]): boolean => {
         let [kingRow, kingCol] = this.getOpposingKingLoc(board, selectedCell);
         if(moves.find((x) => x === kingRow * boardSize + kingCol) != undefined){
             return true;
@@ -114,7 +151,9 @@ class Chess{
     }
 
     /**
-     * Return true if king piece is in check
+     * Return true if king is threatened and unable to escape it within the next turn
+     * TODO: This isnt going to work and it will be difficult to fix
+     * (ie: how do you check that another piece can move to block the current threat to its king?)
      * @param board 
      */
     static isCheckMate = (board: BoardState, kingCell: number): boolean =>{
@@ -322,7 +361,7 @@ class Chess{
             validMoves.push((row+1) * boardSize + col - 2 );
         //
         if(!Chess.isConflict(board, [row,col], [row-1, col-2]))
-            validMoves.push((row-1) * boardSize + col - 1);
+            validMoves.push((row-1) * boardSize + col - 2);
         //
         if(!Chess.isConflict(board, [row,col], [row-2, col-1]))
             validMoves.push((row-2) * boardSize + col - 1);

@@ -1,18 +1,27 @@
 import { useState } from "react";
-const Status = () => {
-    let status : string[] = [];
-    const [statusList, setStatusList] = useState([]);
+import { StatusProps } from "../../Types/Types";
+import "./Status.css";
+
+const Status = (props: StatusProps) => {
     let list: JSX.Element[] = [];
-    statusList.forEach((message) => {
+    let id = 0;
+    props.log.forEach((message) => {
         list.push(
-            <li>
+            <li key={id.toString()}>
                 {message};
             </li>
         )
+        id++;
     })
     return(
-        <div id="status_list">
-            <ul>
+        <div className='status'>
+            <div>
+                <p>{props.isLightTurn ? 'Light Turn': 'Dark Turn'}</p>
+            </div>
+            <div>
+                <p>{props.isCheck ? 'CHECK PLEASE!!' : ''}</p>
+            </div>
+            <ul className='log'>
                 {list}
             </ul>
         </div>
