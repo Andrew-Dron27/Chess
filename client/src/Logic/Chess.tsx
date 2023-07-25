@@ -78,14 +78,79 @@ class Chess{
     }
 
     /**
+     * Returns the location of the king on the opposing
+     * @param board 
+     * @param selectedCell 
+     * @returns 
+     */
+    static getOpposingKingLoc = (board: BoardState, selectedCell: number): [number, number] =>{
+        let [row, col] = Chess.idToRowAndCol(selectedCell);
+        let darkKingLoc: [number,number] = [0,0];
+        let lightKingLoc: [number, number] = [0,0];
+        for(let i = 0; i < boardSize; i++){
+            for(let j = 0; j < boardSize; j++){
+                if(board.board[i][j] === PieceNames.darkKing){
+                    darkKingLoc = [i,j];
+                }
+                else if(board.board[i][j] === PieceNames.lightKing){
+                    lightKingLoc = [i,j];
+                }
+            }
+        }
+        if(this.isDarkPiece(board.board[row][col])){
+            return lightKingLoc;
+        }
+        else{
+            return darkKingLoc;
+        }   
+    }
+
+    static isCheck = (board: BoardState, selectedCell: number, moves: [number]): boolean => {
+        let [kingRow, kingCol] = this.getOpposingKingLoc(board, selectedCell);
+        if(moves.find((x) => x === kingRow * boardSize + kingCol) != undefined){
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Return true if king piece is in check
      * @param board 
      */
-    static isCheck = (board: BoardState): boolean =>{
+    static isCheckMate = (board: BoardState, kingCell: number): boolean =>{
         let allMoves: number[] = [];
-        for(let i = 0; i < 64; i++){
-            allMoves.concat(Chess.calculatePossibleMoves(board,i));
+        let [row, col] = Chess.idToRowAndCol(kingCell);
+        let kingMoves: number[] = Chess.calculatePossibleMoves(board, kingCell);
+        //light king
+        if(Chess.isDarkPiece(board.board[row][col])){
+            for(let i = 0; i < 64; i++){
+                [row, col] = Chess.idToRowAndCol(i);
+                //dont count the current kings and empty moves
+                if(board.board[row][col] === PieceNames.empty || i === kingCell)
+                    continue;
+                if(Chess.isLightPiece(board.board[row][col])){
+                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
+                }
+            }
         }
+        //dark king
+        else {
+            for(let i = 0; i < 64; i++){
+                [row, col] = Chess.idToRowAndCol(i);
+                //dont count the current kings and empty moves
+                if(board.board[row][col] === PieceNames.empty || i === kingCell)
+                    continue;
+                if(Chess.isDarkPiece(board.board[row][col])){
+                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
+                }
+            }
+        }
+
+        kingMoves.forEach((move) => {
+            if(allMoves.find((x) => x === move)){
+                return true;
+            }
+        })
         return false;
     }
 
@@ -146,7 +211,7 @@ class Chess{
         if(Chess.isOpposingPiece(board, [row,col], [row-1, col+1]))
             validMoves.push((row-1) * boardSize + col + 1);
         //if starting position check two spaces ahead
-        if(row == 6){
+        if(row === 6){
             validMoves.push((row-2) * boardSize + col);
         }
         return validMoves;
@@ -168,7 +233,7 @@ class Chess{
         if(Chess.isOpposingPiece(board, [row,col], [row+1, col+1]))
             validMoves.push((row+1) * boardSize + col + 1);
         //if starting position check two spaces ahead
-        if(row == 1){
+        if(row === 1){
             validMoves.push((row+2) * boardSize + col);
         }
         return validMoves;
@@ -407,7 +472,7 @@ class Chess{
         
         let checkPiece = board.board[checkRow][checkCol];
 
-        if(checkPiece == PieceNames.empty)
+        if(checkPiece === PieceNames.empty)
             return false;
         
         if(Chess.isLightPiece(piece) && Chess.isLightPiece(checkPiece)){
