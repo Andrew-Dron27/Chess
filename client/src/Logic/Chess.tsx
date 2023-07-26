@@ -142,55 +142,68 @@ class Chess{
      * @param moves 
      * @returns 
      */
-    static isCheck = (board: BoardState, selectedCell: number, moves: number[]): boolean => {
-        let [kingRow, kingCol] = this.getOpposingKingLoc(board, selectedCell);
-        if(moves.find((x) => x === kingRow * boardSize + kingCol) != undefined){
-            return true;
+    static isCheck = (board: BoardState): [boolean, boolean, boolean, boolean] => {
+        let allPossibleLightMoves: number[] = [];
+        let allPossibleDarkMoves: number[] = [];
+        let darkKingLoc: [number,number] = [0,0];
+        let lightKingLoc: [number, number] = [0,0];
+        let threateningPieces: number[][] = [];
+
+        //0 is lightCheck 1 is darkCheck 2 is lightCheckMate 3 is darkCheckMate
+        //super jank I know but it is what it is
+        let checks: [boolean, boolean, boolean, boolean] = [false, false, false, false];
+
+
+        for(let i = 0; i < boardSize; i++){   
+            for(let j = 0; j < boardSize; j++){
+                if(board.board[i][j] === PieceNames.darkKing){
+                    darkKingLoc = [i,j];
+                    continue;
+                }
+                else if(board.board[i][j] === PieceNames.lightKing){
+                    lightKingLoc = [i,j];
+                    continue;
+                }
+                if(board.board[i][j] === PieceNames.empty)
+                    continue;
+                if(this.isDarkPiece(board.board[i][j])){
+                    let moves = allPossibleDarkMoves.concat(Chess.calculatePossibleMoves(board, i * boardSize + j));
+
+                }
+                else if(this.isLightPiece(board.board[i][j])){
+                    allPossibleLightMoves = allPossibleLightMoves.concat(Chess.calculatePossibleMoves(board, i * boardSize + j));
+                }
+            }
         }
-        return false;
+
+        if(allPossibleDarkMoves.includes(lightKingLoc[0] * boardSize + lightKingLoc[1])){
+            //light king is in check
+            checks[0] = true;
+            if(Chess.isCheckMate(board,lightKingLoc[0] * boardSize + lightKingLoc[1], allPossibleDarkMoves))
+                checks[2] = true;
+        }
+        if(allPossibleLightMoves.includes(darkKingLoc[0] * boardSize + darkKingLoc[1])){
+            //dark king is in check
+            checks[1] = true;
+            if(Chess.isCheckMate(board,darkKingLoc[0] * boardSize + darkKingLoc[1], allPossibleLightMoves))
+                checks[3] = true;
+        }
+        return checks;
     }
 
     /**
      * Return true if king is threatened and unable to escape it within the next turn
-     * TODO: This isnt going to work and it will be difficult to fix
-     * (ie: how do you check that another piece can move to block the current threat to its king?)
      * @param board 
      */
-    static isCheckMate = (board: BoardState, kingCell: number): boolean =>{
-        let allMoves: number[] = [];
-        let [row, col] = Chess.idToRowAndCol(kingCell);
-        let kingMoves: number[] = Chess.calculatePossibleMoves(board, kingCell);
-        //light king
-        if(Chess.isDarkPiece(board.board[row][col])){
-            for(let i = 0; i < 64; i++){
-                [row, col] = Chess.idToRowAndCol(i);
-                //dont count the current kings and empty moves
-                if(board.board[row][col] === PieceNames.empty || i === kingCell)
-                    continue;
-                if(Chess.isLightPiece(board.board[row][col])){
-                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
-                }
-            }
-        }
-        //dark king
-        else {
-            for(let i = 0; i < 64; i++){
-                [row, col] = Chess.idToRowAndCol(i);
-                //dont count the current kings and empty moves
-                if(board.board[row][col] === PieceNames.empty || i === kingCell)
-                    continue;
-                if(Chess.isDarkPiece(board.board[row][col])){
-                    allMoves.concat(Chess.calculatePossibleMoves(board,i));
-                }
-            }
-        }
-
-        kingMoves.forEach((move) => {
-            if(allMoves.find((x) => x === move)){
-                return true;
-            }
-        })
-        return false;
+    static isCheckMate = (board: BoardState, kingCell: number, allPossibleMoves: number[]): boolean =>{
+        //TODO: Checkmate will not work, how can we check that another peice can move and block the opposing peices threat?
+        let kingMoves = this.calculatePossibleMoves(board, kingCell);
+        let isCheckMate: boolean = false;
+        kingMoves.forEach((x) => {
+            if(!allPossibleMoves.includes(x))
+                isCheckMate = true;
+        });
+        return isCheckMate;
     }
 
     /**

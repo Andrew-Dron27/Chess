@@ -6,6 +6,7 @@ import { BoardState } from "../../Types/Types";
 import Chess from "../../Logic/Chess";
 import Colors from "../../enums/Colors";
 import Status from "../Status/Status";
+import GameOver from "../GameOver/GameOver";
 
 const Board = () => {
 
@@ -13,10 +14,17 @@ const Board = () => {
     const [selectedCell, setSelectedCell] = useState<number>(-1);
     const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
     const [possibleMoves, setPossibleMoves] = useState<number[]>([]);
+
     const [isLightTurn, setisLightTurn] = useState<boolean>(true);
+
     const [capturedLightPieces, setCapturedLightPieces] = useState<string[]>([]);
     const [capturedDarkPieces, setCapturedDarkPieces] = useState<string[]>([]);
-    const [isCheck, setIsCheck] = useState<boolean>(false);
+
+    const [isLightCheck, setIsLightCheck] = useState<boolean>(false);
+    const [isDarkCheck, setIsDarkCheck] = useState<boolean>(false);
+    const [isLightCheckMate, setIsLightCheckMate] = useState<boolean>(false);
+    const [isDarkCheckMate, setIsDarkCheckMate] = useState<boolean>(false);
+
     const [statusLog, setStatusLog] = useState<string[]>([]);
 
     const determineColor = (id: number): string => {
@@ -54,7 +62,6 @@ const Board = () => {
       if((Chess.isLightPiece(clickedPiece) && !isLightTurn && !isPossibleMove) 
       || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove))
       {
-        console.log(isLightTurn);
         return;
       }
         
@@ -66,8 +73,6 @@ const Board = () => {
         let newState = boardState;
         let [row,col] = Chess.idToRowAndCol(id);
         let [prevRow, prevCol] = Chess.idToRowAndCol(selectedCell);
-
-        console.log(boardState.board[prevRow][prevCol]);
 
         setStatusLog(statusLog.concat(Chess.logChessMove(boardState, [row, col], [prevRow, prevCol])));
 
@@ -92,11 +97,15 @@ const Board = () => {
         setBoardState(newState);
         setisLightTurn(!isLightTurn);
         setPossibleMoves([]);
-        setIsCheck(Chess.isCheck(boardState, selectedCell, Chess.calculatePossibleMoves(boardState,selectedCell)))
-        setIsCheck(true);
+        
+        //after every move check for a threatened king
+        let checkState = Chess.isCheck(boardState);
+        setIsLightCheck(checkState[0]);
+        setIsDarkCheck(checkState[1]);
+        setIsLightCheckMate(checkState[2]);
+        setIsDarkCheckMate(checkState[3]);
         return;
       }
-
 
       if(id == -1)
         setPossibleMoves([]);
@@ -150,9 +159,16 @@ const Board = () => {
           <Status 
           log={statusLog}
           isLightTurn={isLightTurn}
-          isCheck={isCheck}
+          isLightCheck={isLightCheck}
+          isDarkCheck={isDarkCheck}
+          isLightCheckMate={isLightCheckMate}
+          isDarkCheckMate={isDarkCheckMate}
           />
         </div>
+        {isLightCheckMate || isDarkCheckMate && 
+        <GameOver
+          winner = {isLightCheckMate ? 'Light' : 'Dark'}
+        />}
       </div>
     )
 }
