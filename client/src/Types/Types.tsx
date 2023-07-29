@@ -26,4 +26,5 @@ export type StatusProps = {
 
 export type GameOverProps = {
   winner: string
+  resetGame: () => void,
 }

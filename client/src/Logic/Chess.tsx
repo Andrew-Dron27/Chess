@@ -7,8 +7,8 @@ const boardSize = 8;
 /**
  * Static library of various usefull methods for a chess game where the state is stored elsewhere.
  * 
- * If I had to rewrite this I would want it to be a statefull class with a private cell class as that would make many of 
- * the methods and state checks much simpler. But I made my bed and now I am lying in it.
+ * This class is kind of a mess. I tried to keep all state localized to the react board componenet.
+ * But having the state stored in this class would have made things much more straightforward
  */
 class Chess{
     /**
@@ -158,12 +158,12 @@ class Chess{
      * @param moves 
      * @returns 
      */
-    static isCheck = (board: BoardState): [boolean, boolean, boolean, boolean] => {
+    static isCheck = (board: BoardState, lightBlockers: number[] = [], darkBlockers: number[] = []): [boolean, boolean, boolean, boolean] => {
         let allPossibleLightMoves: number[][] = [];
         let allPossibleDarkMoves: number[][] = [];
         let darkKingLoc: [number,number] = [0,0];
         let lightKingLoc: [number, number] = [0,0];
-        let threateningPieces: number[][] = [];
+
 
         //0 is lightCheck, 1 is darkCheck, 2 is lightCheckMate, 3 is darkCheckMate
         //kinda jank I know but it is what it is
@@ -195,12 +195,15 @@ class Chess{
             }
         }
 
+
+        let threateningDarkPieces: number[][] = [];
+        let threateningLightPieces: number[][] = [];
         //calcualte check
         for(let i = 0; i < allPossibleDarkMoves.length; i++){
             if(allPossibleDarkMoves[i].includes(Chess.rowAndColToId(lightKingLoc[0],lightKingLoc[1]))){
                 //light king is in check
                 checks[0] = true;
-                threateningPieces.push(allPossibleDarkMoves[i]);
+                threateningDarkPieces.push(allPossibleDarkMoves[i]);
             }
         }
 
@@ -208,22 +211,22 @@ class Chess{
             if(allPossibleLightMoves[i].includes(Chess.rowAndColToId(darkKingLoc[0],darkKingLoc[1]))){
                 //dark king is in check
                 checks[1] = true;
-                threateningPieces.push(allPossibleLightMoves[i]);
+                threateningLightPieces.push(allPossibleLightMoves[i]);
             }
         }
 
         //calculate checkmate
         if(checks[0]){
-            if(Chess.isCheckMate(board, Chess.rowAndColToId(lightKingLoc[0],lightKingLoc[1]), threateningPieces,
-            allPossibleLightMoves)){
+            if(Chess.isCheckMate(board, Chess.rowAndColToId(lightKingLoc[0],lightKingLoc[1]), threateningDarkPieces,
+            allPossibleLightMoves, lightBlockers)){
                 checks[2] = true;
             }
     
         }
 
         if(checks[1]){
-            if(Chess.isCheckMate(board, Chess.rowAndColToId(darkKingLoc[0],darkKingLoc[1]), threateningPieces,
-            allPossibleDarkMoves)){
+            if(Chess.isCheckMate(board, Chess.rowAndColToId(darkKingLoc[0],darkKingLoc[1]), threateningLightPieces,
+            allPossibleDarkMoves, darkBlockers)){
                 checks[3] = true;
             }
         }
@@ -236,7 +239,7 @@ class Chess{
      * @param board 
      */
     static isCheckMate = (board: BoardState, kingCell: number, threateningPieces: number[][], 
-        alliedMoveset: number[][]): boolean =>{
+        alliedMoveset: number[][], blockingPieces: number[]): boolean =>{
         //TODO: Checkmate will not work, how can we check that another peice can move and block the opposing peices threat?
         let kingMoves = this.calculatePossibleMoves(board, kingCell);
         let kingInvalidMoves: boolean[] = [];
@@ -271,7 +274,8 @@ class Chess{
                     console.log(threatLoc);
                     console.log(alliedMoveset[j]);
                     console.log("allies can kill the threat");
-                    return false;
+                    isCheckMate = false;
+                    blockingPieces.push(alliedMoveset[j][0]);
                 }
                 //convert to 1d array for potential check blocking calcualtions
                 alliedMovesVector.concat(alliedMoveset[j]);
@@ -295,7 +299,7 @@ class Chess{
                             if(threateningPieces[i].includes(x) && alliedMovesVector.includes(x)){
                                 //threat can be blocked
                                 console.log("allies can block the threat");
-                                return false;
+                                isCheckMate = false;
                             }
                             x+=9;//down right diag vector increases by 9
                         }
@@ -307,33 +311,33 @@ class Chess{
                             if(threateningPieces[i].includes(x) && alliedMovesVector.includes(x)){
                                 //threat can be blocked
                                 console.log("allies can block the threat");
-                                return false;
+                                isCheckMate = false;
                             }
                             x+=7;// down left diag vector increases by 7
                         }
                     }
                     else if(kingRow < threatRow && kingCol > threatCol){
-                        //up right diagonal movement vector
+                        //up left diagonal movement vector
                         let x = threatLoc - 9;
                         while(x >= 0 && x != kingCell){
                             if(threateningPieces[i].includes(x) && alliedMovesVector.includes(x)){
                                 //threat can be blocked
                                 console.log("allies can block the threat");
-                                return false;
+                                isCheckMate = false;
                             }
                             x-=9;//diag vector decreases by 9
                         }
                     }
                     else{
-                        //up left diagonal movement vector
+                        //up right diagonal movement vector
                         let x = threatLoc - 7;
                         while(x >= 0 && x != kingCell){
                             if(threateningPieces[i].includes(x) && alliedMovesVector.includes(x)){
                                 //threat can be blocked
                                 console.log("allies can block the threat");
-                                return false;
+                                isCheckMate = false;
                             }
-                            x-=7;//diag vector decreases by 9
+                            x-=7;//diag vector decreases by 7
                         }
                     }
                     break;
@@ -348,7 +352,8 @@ class Chess{
 
         if(kingInvalidMoves.includes(false)){//there exists at least one viable move left for our king
             console.log("king can move from the threat");
-            return false;
+
+            isCheckMate = false;
         }
         return isCheckMate;
     }

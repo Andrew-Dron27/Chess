@@ -5,7 +5,12 @@ const GameOver = (props: GameOverProps) => {
     let winner = props.winner;
     return (
         <div id="Game_Over">
-            <p>{`Your Winner ${winner}!`}</p>
+            <div>
+                <p>{`Your Winner ${winner}!`}</p>
+            </div>
+            <div>
+                <button onClick={props.resetGame}></button>
+            </div>
         </div>
     );
 }

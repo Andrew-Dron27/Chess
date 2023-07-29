@@ -8,7 +8,7 @@ import Colors from "../../enums/Colors";
 import Status from "../Status/Status";
 import GameOver from "../GameOver/GameOver";
 
-const url = 'localhost:3001/rock-n-roll-mcdonalds'
+const url = 'localhost:3001/chess'
 
 const Board = () => {
 
@@ -26,6 +26,10 @@ const Board = () => {
     const [isDarkCheck, setIsDarkCheck] = useState<boolean>(false);
     const [isLightCheckMate, setIsLightCheckMate] = useState<boolean>(false);
     const [isDarkCheckMate, setIsDarkCheckMate] = useState<boolean>(false);
+
+    //potentinal pieces that can be moved when in check
+    const [darkCheckBlockers, setDarkCheckBlockers] = useState<number[]>([]);
+    const [lightCheckBlockers, setLightCheckBlockers] = useState<number[]>([]);
 
     const [statusLog, setStatusLog] = useState<string[]>([]);
 
@@ -60,11 +64,43 @@ const Board = () => {
       }
     }
 
+    const resetGame = () => {
+      setSelectedCell(-1);
+      setBoardState(Chess.initBoardState);
+      setSelectedPiece(PieceNames.empty);
+      setPossibleMoves([]);
+      setisLightTurn(true);
+      setCapturedDarkPieces([]);
+      setCapturedLightPieces([]);
+      setIsLightCheck(false);
+      setIsDarkCheck(false);
+      setIsLightCheckMate(false);
+      setIsDarkCheckMate(false);
+      setDarkCheckBlockers([]);
+      setLightCheckBlockers([]);
+      setStatusLog([]);
+    }
+
     const onCellClick = (id: number, clickedPiece: string, isPossibleMove: boolean) => {
       if((Chess.isLightPiece(clickedPiece) && !isLightTurn && !isPossibleMove) 
-      || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove))
+      || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove)
+      || isDarkCheckMate || isLightCheckMate)
       {
         return;
+      }
+
+
+      //if in check must move the king or a piece to block the threat
+      if(isDarkCheck){
+        if(clickedPiece !== PieceNames.darkKing || !darkCheckBlockers.includes(id)){
+          return;
+        }
+      }
+
+      if (isLightCheck){
+        if(clickedPiece !== PieceNames.lightKing || !lightCheckBlockers.includes(id)){
+          return;
+        }
       }
         
       setSelectedCell(id);
@@ -101,7 +137,17 @@ const Board = () => {
         setPossibleMoves([]);
         
         //after every move check for a threatened king
-        let checkState = Chess.isCheck(boardState);
+        let lightBlockers: number[] = [];
+        let darkBlockers: number[] = [];
+        let checkState = Chess.isCheck(boardState, lightBlockers, darkBlockers);
+        if(checkState[0] || [1]){
+          setLightCheckBlockers(lightBlockers);
+          setDarkCheckBlockers(darkBlockers);
+        }
+        else{
+          setLightCheckBlockers([]);
+          setDarkCheckBlockers([]);
+        }
         setIsLightCheck(checkState[0]);
         setIsDarkCheck(checkState[1]);
         setIsLightCheckMate(checkState[2]);
@@ -171,6 +217,7 @@ const Board = () => {
         {isLightCheckMate || isDarkCheckMate && 
         <GameOver
           winner = {isLightCheckMate ? 'Dark' : 'Light'}
+          resetGame={resetGame}
         />}
       </div>
     )
