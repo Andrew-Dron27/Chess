@@ -25,10 +25,10 @@ const Status = (props: StatusProps) => {
                 <p>{props.isDarkCheck ? 'DARK CHECK PLEASE!!' : ''}</p>
             </div>
             <div className='light_checkMate'>
-                <p>{props.isLightCheck ? 'Light hath been defeatedeth' : ''}</p>
+                <p>{props.isLightCheckMate ? 'Light hath been defeatedeth' : ''}</p>
             </div>
             <div className='dark_checkMate'>
-                <p>{props.isDarkCheck ? 'Dark hath been defeatedeth' : ''}</p>
+                <p>{props.isDarkCheckMate ? 'Dark hath been defeatedeth' : ''}</p>
             </div>
             <ul className='log'>
                 {list}
