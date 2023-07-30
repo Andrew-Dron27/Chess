@@ -18,5 +18,13 @@ export type CellProps = {
 export type StatusProps = {
   log: string[],
   isLightTurn: boolean,
-  isCheck: boolean,
+  isLightCheck: boolean,
+  isDarkCheck: boolean,
+  isLightCheckMate: boolean,
+  isDarkCheckMate: boolean
+}
+
+export type GameOverProps = {
+  winner: string
+  resetGame: () => void,
 }

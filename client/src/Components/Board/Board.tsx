@@ -6,6 +6,9 @@ import { BoardState } from "../../Types/Types";
 import Chess from "../../Logic/Chess";
 import Colors from "../../enums/Colors";
 import Status from "../Status/Status";
+import GameOver from "../GameOver/GameOver";
+
+const url = 'localhost:3001/chess'
 
 const Board = () => {
 
@@ -13,10 +16,21 @@ const Board = () => {
     const [selectedCell, setSelectedCell] = useState<number>(-1);
     const [selectedPiece, setSelectedPiece] = useState<string>(PieceNames.empty);
     const [possibleMoves, setPossibleMoves] = useState<number[]>([]);
+
     const [isLightTurn, setisLightTurn] = useState<boolean>(true);
+
     const [capturedLightPieces, setCapturedLightPieces] = useState<string[]>([]);
     const [capturedDarkPieces, setCapturedDarkPieces] = useState<string[]>([]);
-    const [isCheck, setIsCheck] = useState<boolean>(false);
+
+    const [isLightCheck, setIsLightCheck] = useState<boolean>(false);
+    const [isDarkCheck, setIsDarkCheck] = useState<boolean>(false);
+    const [isLightCheckMate, setIsLightCheckMate] = useState<boolean>(false);
+    const [isDarkCheckMate, setIsDarkCheckMate] = useState<boolean>(false);
+
+    //potentinal pieces that can be moved when in check
+    const [darkCheckBlockers, setDarkCheckBlockers] = useState<number[]>([]);
+    const [lightCheckBlockers, setLightCheckBlockers] = useState<number[]>([]);
+
     const [statusLog, setStatusLog] = useState<string[]>([]);
 
     const determineColor = (id: number): string => {
@@ -50,12 +64,43 @@ const Board = () => {
       }
     }
 
+    const resetGame = () => {
+      setSelectedCell(-1);
+      setBoardState(Chess.initBoardState);
+      setSelectedPiece(PieceNames.empty);
+      setPossibleMoves([]);
+      setisLightTurn(true);
+      setCapturedDarkPieces([]);
+      setCapturedLightPieces([]);
+      setIsLightCheck(false);
+      setIsDarkCheck(false);
+      setIsLightCheckMate(false);
+      setIsDarkCheckMate(false);
+      setDarkCheckBlockers([]);
+      setLightCheckBlockers([]);
+      setStatusLog([]);
+    }
+
     const onCellClick = (id: number, clickedPiece: string, isPossibleMove: boolean) => {
       if((Chess.isLightPiece(clickedPiece) && !isLightTurn && !isPossibleMove) 
-      || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove))
+      || (Chess.isDarkPiece(clickedPiece) && isLightTurn && !isPossibleMove)
+      || isDarkCheckMate || isLightCheckMate)
       {
-        console.log(isLightTurn);
         return;
+      }
+
+
+      //if in check must move the king or a piece to block the threat
+      if(isDarkCheck){
+        if(clickedPiece !== PieceNames.darkKing || !darkCheckBlockers.includes(id)){
+          return;
+        }
+      }
+
+      if (isLightCheck){
+        if(clickedPiece !== PieceNames.lightKing || !lightCheckBlockers.includes(id)){
+          return;
+        }
       }
         
       setSelectedCell(id);
@@ -66,8 +111,6 @@ const Board = () => {
         let newState = boardState;
         let [row,col] = Chess.idToRowAndCol(id);
         let [prevRow, prevCol] = Chess.idToRowAndCol(selectedCell);
-
-        console.log(boardState.board[prevRow][prevCol]);
 
         setStatusLog(statusLog.concat(Chess.logChessMove(boardState, [row, col], [prevRow, prevCol])));
 
@@ -92,16 +135,31 @@ const Board = () => {
         setBoardState(newState);
         setisLightTurn(!isLightTurn);
         setPossibleMoves([]);
-        setIsCheck(Chess.isCheck(boardState, selectedCell, Chess.calculatePossibleMoves(boardState,selectedCell)))
-        setIsCheck(true);
+        
+        //after every move check for a threatened king
+        let lightBlockers: number[] = [];
+        let darkBlockers: number[] = [];
+        let checkState = Chess.isCheck(boardState, lightBlockers, darkBlockers);
+        if(checkState[0] || [1]){
+          setLightCheckBlockers(lightBlockers);
+          setDarkCheckBlockers(darkBlockers);
+        }
+        else{
+          setLightCheckBlockers([]);
+          setDarkCheckBlockers([]);
+        }
+        setIsLightCheck(checkState[0]);
+        setIsDarkCheck(checkState[1]);
+        setIsLightCheckMate(checkState[2]);
+        setIsDarkCheckMate(checkState[3]);
+
+        //sendBoardData(boardState.board);
         return;
       }
 
-
       if(id == -1)
         setPossibleMoves([]);
-      else
-      {
+      else{
         let moves = Chess.calculatePossibleMoves(boardState, id)
         setPossibleMoves(moves);
       }
@@ -150,11 +208,38 @@ const Board = () => {
           <Status 
           log={statusLog}
           isLightTurn={isLightTurn}
-          isCheck={isCheck}
+          isLightCheck={isLightCheck}
+          isDarkCheck={isDarkCheck}
+          isLightCheckMate={isLightCheckMate}
+          isDarkCheckMate={isDarkCheckMate}
           />
         </div>
+        {isLightCheckMate || isDarkCheckMate && 
+        <GameOver
+          winner = {isLightCheckMate ? 'Dark' : 'Light'}
+          resetGame={resetGame}
+        />}
       </div>
     )
+}
+
+const sendBoardData = async (data = {}) =>{
+  // Example POST method implementation
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    body: JSON.stringify(data), // body data type must match "Content-Type" header
+  });
+  return response.json(); // parses JSON response into native JavaScript objects
 }
 
 export default Board;

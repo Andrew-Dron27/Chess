@@ -18,8 +18,17 @@ const Status = (props: StatusProps) => {
             <div>
                 <p>{props.isLightTurn ? 'Light Turn': 'Dark Turn'}</p>
             </div>
-            <div>
-                <p>{props.isCheck ? 'CHECK PLEASE!!' : ''}</p>
+            <div className='light_check'>
+                <p>{props.isLightCheck ? 'LIGHT CHECK PLEASE!!' : ''}</p>
+            </div>
+            <div className='dark_check'>
+                <p>{props.isDarkCheck ? 'DARK CHECK PLEASE!!' : ''}</p>
+            </div>
+            <div className='light_checkMate'>
+                <p>{props.isLightCheckMate ? 'Light hath been defeatedeth' : ''}</p>
+            </div>
+            <div className='dark_checkMate'>
+                <p>{props.isDarkCheckMate ? 'Dark hath been defeatedeth' : ''}</p>
             </div>
             <ul className='log'>
                 {list}
