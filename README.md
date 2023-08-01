@@ -1,5 +1,7 @@
-Currently a work in progress chess app. Using this as a way to brush up on my react skillset as well as
-learn how rust can be compatible with web applications
+Currently a work in progress chess app.
+This exists less as a practically usefull application and
+more as a way for me to learn and practice writing full stack applications
+and seeing how Rust can interact with web technologies
 
 
 In the client directory, you can run the client with:
