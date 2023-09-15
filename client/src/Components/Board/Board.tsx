@@ -153,7 +153,7 @@ const Board = () => {
         setIsLightCheckMate(checkState[2]);
         setIsDarkCheckMate(checkState[3]);
 
-        sendBoardData(boardState.board);
+        //sendBoardData(boardState.board);
         return;
       }
 
