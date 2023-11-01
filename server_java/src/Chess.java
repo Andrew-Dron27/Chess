@@ -1,3 +1,4 @@
+package src;
 import java.util.ArrayList;
 
 public class Chess 
@@ -24,12 +25,12 @@ public class Chess
 
     public Chess()
     {
-        Board = new Cell[SIZE-1][SIZE-1];
+        Board = new Cell[SIZE][SIZE];
     }
 
     public Cell[][] initGame()
     {
-        Cell[][] newBoard = new Cell[SIZE-1][SIZE-1];
+        Cell[][] newBoard = new Cell[SIZE][SIZE];
 
         Piece[][] pieceOrder = 
         {
@@ -231,6 +232,15 @@ public class Chess
     private ArrayList<Cell> calculteValidRookMoves(int row, int col)
     {
         ArrayList<Cell> moves = new ArrayList<Cell>();
+
+        for(int i = 0; i < SIZE; i++)
+        {
+            if(isValidMove(Board[row][col], i, col))
+            {
+                
+            }
+        }
+        
         return moves;
     }
 
